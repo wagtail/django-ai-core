@@ -2,6 +2,7 @@
 
 import pgvector.django.indexes
 import pgvector.django.vector
+from pgvector.django import VectorExtension
 from django.db import migrations, models
 
 
@@ -11,6 +12,7 @@ class Migration(migrations.Migration):
     dependencies = []
 
     operations = [
+        VectorExtension(),
         migrations.CreateModel(
             name="Book",
             fields=[
