@@ -38,6 +38,9 @@ class PgVectorModelMixin(models.Model):
     class Meta:
         abstract = True
 
+    def __str__(self):
+        return self.document_key
+
     @property
     def vector(self) -> list[float]:
         """

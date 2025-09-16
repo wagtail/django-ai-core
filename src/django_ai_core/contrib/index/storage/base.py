@@ -1,4 +1,4 @@
-from typing import Protocol, ClassVar, Generic, TypeVar, Generator
+from typing import Protocol, ClassVar, Generic, TypeVar, Generator, Any
 
 from ..schema import EmbeddedDocument
 from queryish import VirtualModel, Queryish
@@ -10,7 +10,7 @@ class StorageQuerySet(Queryish, Generic[StorageProviderType]):
     """Queryish interface for storage backends."""
 
     storage_provider: StorageProviderType | None = None
-    model: type["StorageDocument"] | None = None
+    model: type["StorageDocument"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -32,9 +32,16 @@ class StorageDocument(VirtualModel):
 
     base_query_class = StorageQuerySet
 
+    document_key: str
+    content: str
+    metadata: dict[str, Any]
+
     class Meta:
         fields = ["document_key", "content", "metadata"]
         storage_provider: "StorageProvider"
+
+    def __str__(self):
+        return self.document_key
 
 
 class StorageProvider(Protocol):

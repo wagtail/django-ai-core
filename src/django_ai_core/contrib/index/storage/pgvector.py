@@ -12,23 +12,13 @@ if TYPE_CHECKING:
 class PgVectorQuerySet(StorageQuerySet["PgVectorProvider"]):
     """QuerySet implementation for PgVectorProvider."""
 
-    def get_instance(self, model_instance: "PgVectorModelMixin") -> StorageDocument:
+    def get_instance(self, val: "PgVectorModelMixin") -> StorageDocument:
         """Convert a Django model instance to a StorageDocument."""
-        if self.model:
-            return self.model(
-                document_key=model_instance.document_key,
-                content=model_instance.content,
-                metadata=model_instance.metadata,
-            )
-        else:
-            # Create a pseudo-StorageDocument from the model instance
-            class PseudoStorageDocument:
-                document_key = model_instance.document_key
-                content = model_instance.content
-                metadata = model_instance.metadata
-                vector = model_instance.vector
-
-            return PseudoStorageDocument()
+        return self.model(
+            document_key=val.document_key,
+            content=val.content,
+            metadata=val.metadata,
+        )
 
     def run_query(self) -> Generator[StorageDocument, None, None]:
         """Execute the query and return the results."""
@@ -59,7 +49,6 @@ class PgVectorQuerySet(StorageQuerySet["PgVectorProvider"]):
         for key, value in filter_map.items():
             queryset = queryset.filter(**{f"metadata__{key}": value})
 
-        # Apply top_k limit
         queryset = queryset[: self._top_k]
 
         for instance in queryset:
@@ -147,7 +136,7 @@ class PgVectorProvider(StorageProvider):
             instances.append(instance)
 
         # Save all instances using bulk_create and bulk_update
-        existing_keys = [i.document_key for i in instances if i.pk]
+        existing_keys = [i.document_key for i in instances if not i._state.adding]
         new_instances = [i for i in instances if i.pk not in existing_keys]
 
         # Bulk update existing instances
