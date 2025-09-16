@@ -5,6 +5,8 @@ logger = logging.getLogger(__name__)
 
 
 class LLMService:
+    """Light wrapper around any-llm"""
+
     def __init__(self, *, provider: str, model: str):
         self.provider = provider
         self.model = model
