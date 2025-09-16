@@ -1,0 +1,30 @@
+[project]
+name = "django-ai-core"
+version = "0.1.0"
+description = "Django AI Core provides developer-focused AI features for implementing AI tooling in to Django sites."
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "any-llm-sdk>=0.17.1",
+    "queryish>=0.2.0"
+]
+
+[dependency-groups]
+dev = [
+    "dj-database-url>=3.0.0",
+    "django>=5.2.3",
+    "mkdocs>=1.6.1",
+    "mkdocs-awesome-nav>=3.2.0",
+    "mkdocs-material>=9.6.20",
+    "pytest>=8.4.1",
+    "pytest-asyncio>=1.0.0",
+]
+llama-index = [
+    "llama-index>=0.12.43",
+]
+pgvector = [
+    "pgvector>=0.4.1",
+]
+test = [
+    "psycopg>=3.2.10",
+]

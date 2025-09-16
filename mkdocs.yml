@@ -1,0 +1,64 @@
+site_name: Django AI Core Documentation
+site_description: Developer-focused AI features for Django sites
+site_url: https://django-ai-core.readthedocs.io/
+
+theme:
+    name: material
+    features:
+        - navigation.tabs
+        - navigation.tabs.sticky
+        - navigation.sections
+        - navigation.expand
+        - navigation.path
+        - navigation.top
+        - navigation.indexes
+        - search.highlight
+        - search.share
+        - toc.follow
+        - content.code.copy
+        - content.code.select
+    palette:
+        - scheme: default
+          primary: teal
+          accent: orange
+          toggle:
+              icon: material/brightness-7
+              name: Switch to dark mode
+        - scheme: slate
+          primary: teal
+          accent: orange
+          toggle:
+              icon: material/brightness-4
+              name: Switch to light mode
+
+markdown_extensions:
+    - admonition
+    - pymdownx.details
+    - pymdownx.superfences:
+          custom_fences:
+              - name: mermaid
+                class: mermaid
+                format: !!python/name:pymdownx.superfences.fence_code_format
+    - pymdownx.highlight:
+          anchor_linenums: true
+          line_spans: __span
+          pygments_lang_class: true
+    - pymdownx.inlinehilite
+    - pymdownx.snippets
+    - pymdownx.tabbed:
+          alternate_style: true
+    - pymdownx.tasklist:
+          custom_checkbox: true
+    - attr_list
+    - md_in_html
+    - tables
+    - footnotes
+    - def_list
+
+plugins:
+    - search
+    - awesome-nav
+
+extra:
+    version:
+        provider: mike
