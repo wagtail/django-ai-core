@@ -1,11 +1,11 @@
 from .base import StorageProvider, StorageQuerySet
 from ..schema import EmbeddedDocument
 
-import numpy as np
-
 
 class InMemoryQuerySet(StorageQuerySet["InMemoryProvider"]):
     def run_query(self):
+        import numpy as np
+
         TEMP_FIXED_SIMILARITY_THRESHOLD = 0.2
 
         storage_provider = self.storage_provider

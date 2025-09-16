@@ -21,7 +21,9 @@ class LLMService:
         )
 
     def responses(self, input_data, **kwargs):
-        return any_llm.embedding(self.model, input_data, **kwargs)
+        return any_llm.embedding(
+            self.model, input_data, provider=self.provider, **kwargs
+        )
 
     def embedding(self, inputs, **kwargs):
-        return any_llm.embedding(self.model, inputs, **kwargs)
+        return any_llm.embedding(self.model, inputs, provider=self.provider, **kwargs)

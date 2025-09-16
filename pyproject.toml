@@ -26,5 +26,5 @@ pgvector = [
     "pgvector>=0.4.1",
 ]
 test = [
-    "psycopg>=3.2.10",
+    "psycopg[binary]>=3.2.10",
 ]
