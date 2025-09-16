@@ -5,43 +5,11 @@ Query interface for vector indexes.
 from typing import TypeVar
 import logging
 
-from queryish import Queryish
-
-from .schema import Document
 from .source import Source
 from .storage import StorageQuerySet
 
 logger = logging.getLogger(__name__)
 ObjectType = TypeVar("ObjectType")
-
-
-class VectorQueryish(Queryish):
-    """QuerySet-like interface for vector search results."""
-
-    def get_objects(self) -> list[object]:
-        """Convert documents to their original objects."""
-        objects = []
-        seen_keys = set()
-
-        for vector_doc in self:
-            obj = vector_doc.get_object()
-            if obj is not None:
-                # Create a unique key for deduplication
-                if hasattr(obj, "_meta") and hasattr(obj, "pk"):
-                    # Django model
-                    obj_key = (obj._meta.label, obj.pk)
-                elif hasattr(obj, "__dict__"):
-                    # Generic object
-                    obj_key = str(obj)
-                else:
-                    # Fallback
-                    obj_key = id(obj)
-
-                if obj_key not in seen_keys:
-                    seen_keys.add(obj_key)
-                    objects.append(obj)
-
-        return objects
 
 
 class QueryHandler:
