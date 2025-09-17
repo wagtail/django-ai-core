@@ -8,7 +8,8 @@ from queryish import VirtualModel
 from .query import QueryHandler
 
 if TYPE_CHECKING:
-    from .storage.base import StorageProvider, StorageQuerySet
+    from .storage.base import StorageProvider
+    from .query import ResultQuerySet
     from .embedding import EmbeddingTransformer
     from .source import Source
 
@@ -36,11 +37,6 @@ class VectorIndex:
             sources=self.sources,
             embedding_transformer=self.embedding_transformer,
         )
-
-    @property
-    def Document(self) -> type[VirtualModel]:
-        """Get the 'virtual model' class for this index."""
-        return self.storage_provider.document_cls()
 
     def build(self):
         """
@@ -80,21 +76,21 @@ class VectorIndex:
 
         return self
 
-    def search(self, query: str) -> "StorageQuerySet":
+    def search(self, query: str) -> "ResultQuerySet":
         """Search the index and return a queryish object of results.
         Args:
             query: The search query string
         Returns:
-            VectorQueryish instance for the search results
+            ResultQuerySet instance for the search results
         """
         return self.query_handler.search(query)
 
-    def find_similar(self, obj: object) -> "StorageQuerySet":
+    def find_similar(self, obj: object) -> "ResultQuerySet":
         """Find objects similar to the given object.
         Args:
             obj: The object to find similar objects to
         Returns:
-            VectorQueryish instance for the search results
+            ResultQuerySet instance for the search results
         """
         return self.query_handler.find_similar(obj)
 

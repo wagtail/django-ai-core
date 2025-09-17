@@ -1,11 +1,11 @@
-from .base import StorageProvider, StorageQuerySet
+from .base import StorageProvider, BaseStorageQuerySet
 from .inmemory import InMemoryProvider
 from .llamaindex import LlamaIndexProvider
 from .pgvector import PgVectorProvider
 
 __all__ = [
     "StorageProvider",
-    "StorageQuerySet",
+    "BaseStorageQuerySet",
     "InMemoryProvider",
     "LlamaIndexProvider",
     "PgVectorProvider",

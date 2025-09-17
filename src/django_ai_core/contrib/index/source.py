@@ -26,6 +26,11 @@ class Source(ABC):
         pass
 
     @abstractmethod
+    def document_belongs_to_source(self, document_key: str) -> bool:
+        """Check if the given object key belongs to this source"""
+        pass
+
+    @abstractmethod
     def get_documents_for_object(self, obj: object) -> list[Document]:
         """Get documents for the given object."""
         pass
@@ -48,7 +53,8 @@ class ModelSource(Source):
         self,
         queryset: QuerySet | None = None,
         model: type[models.Model] | None = None,
-        fields: list[str] | None = None,
+        content_fields: list[str] | None = None,
+        metadata_fields: list[str] | None = None,
         chunk_transformer: ChunkTransformer | None = None,
     ):
         if queryset is not None:
@@ -63,12 +69,13 @@ class ModelSource(Source):
         if chunk_transformer is None:
             self.chunk_transformer = SimpleChunkTransformer()
 
-        self.fields = fields
+        self.content_fields = content_fields
+        self.metadata_fields = metadata_fields
 
-    def _get_fields(self, obj: models.Model) -> list[str]:
+    def _get_content_fields(self, obj: models.Model) -> list[str]:
         """Get the list of fields to use for content extraction."""
-        if self.fields is not None:
-            return self.fields
+        if self.content_fields is not None:
+            return self.content_fields
 
         # If no fields specified, use all concrete fields on the model
         # that have reasonable string representations
@@ -86,32 +93,39 @@ class ModelSource(Source):
 
         return field_names
 
+    def _get_field_value(self, obj: models.Model, field_name: str) -> str | None:
+        # Get the field value directly
+        field_value = getattr(obj, field_name)
+        # Handle callable fields (methods, properties)
+        if callable(field_value):
+            field_value = field_value()
+
+        # Skip None values
+        if field_value is None:
+            return None
+
+        # Format the value
+        if isinstance(field_value, str):
+            final_value = field_value
+        else:
+            final_value = "\n".join(str(v) for v in [field_value] if v is not None)
+
+        return final_value
+
     def get_content(self, obj: models.Model) -> str:
         """Extract text content from model instance."""
         content = []
-        fields = self._get_fields(obj)
+        fields = self._get_content_fields(obj)
 
         for field_name in fields:
             try:
-                # Get the field value directly
-                field_value = getattr(obj, field_name)
-                # Handle callable fields (methods, properties)
-                if callable(field_value):
-                    field_value = field_value()
+                field_value = self._get_field_value(obj, field_name)
 
-                # Skip None values
                 if field_value is None:
                     continue
 
-                # Format the value
-                if isinstance(field_value, str):
-                    final_value = field_value
-                else:
-                    final_value = "\n".join(
-                        str(v) for v in [field_value] if v is not None
-                    )
+                content.append(field_value)
 
-                content.append(final_value)
             except (AttributeError, TypeError):
                 # Skip fields that don't exist or cause errors
                 continue
@@ -120,10 +134,19 @@ class ModelSource(Source):
 
     def get_metadata(self, obj: models.Model) -> dict:
         """Extract metadata from model instance. Override this method to add additional metadata."""
+        metadata_fields = (
+            {
+                field_name: self._get_field_value(obj, field_name)
+                for field_name in self.metadata_fields
+            }
+            if self.metadata_fields
+            else {}
+        )
         return {
             "model": obj._meta.label,
             "pk": obj.pk,
             "source_id": self.source_id,
+            **metadata_fields,
         }
 
     @property
@@ -134,6 +157,9 @@ class ModelSource(Source):
     def object_belongs_to_source(self, obj: object) -> bool:
         """Check if the given object belongs to this source."""
         return self.model is type(obj)
+
+    def document_belongs_to_source(self, document_key: str) -> bool:
+        return document_key.split(":")[0] == self.source_id
 
     def get_documents_for_object(self, obj: models.Model) -> list[Document]:
         """Get documents for the given object."""
@@ -170,16 +196,9 @@ class ModelSource(Source):
     ) -> list[models.Model]:
         """Convert documents back to Django model instances if they were created by this source."""
 
-        def _document_is_for_model(document: Document) -> bool:
-            return (
-                "pk" in document.metadata
-                and "source_id" in document.metadata
-                and document.metadata["source_id"] == self.source_id
-            )
-
         pks = []
         for document in documents:
-            if _document_is_for_model(document):
+            if self.document_belongs_to_source(document.document_key):
                 pks.append(document.metadata["pk"])
 
         if not pks:
@@ -197,7 +216,7 @@ class ModelSource(Source):
         # Return objects in the same order as documents, skipping missing ones
         result = []
         for document in documents:
-            if _document_is_for_model(document):
+            if self.document_belongs_to_source(document.document_key):
                 pk = document.metadata["pk"]
                 if pk in pk_to_object:
                     result.append(pk_to_object[pk])

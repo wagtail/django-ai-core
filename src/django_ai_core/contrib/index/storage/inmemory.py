@@ -1,8 +1,8 @@
-from .base import StorageProvider, StorageQuerySet
+from .base import StorageProvider, BaseStorageQuerySet
 from ..schema import EmbeddedDocument
 
 
-class InMemoryQuerySet(StorageQuerySet["InMemoryProvider"]):
+class InMemoryQuerySet(BaseStorageQuerySet["InMemoryProvider"]):
     def run_query(self):
         import numpy as np
 
@@ -39,7 +39,7 @@ class InMemoryQuerySet(StorageQuerySet["InMemoryProvider"]):
 class InMemoryProvider(StorageProvider):
     """Simple in-memory storage for testing."""
 
-    queryset_cls = InMemoryQuerySet
+    base_queryset_cls = InMemoryQuerySet
 
     def __init__(self):
         self.documents: dict[str, "EmbeddedDocument"] = {}

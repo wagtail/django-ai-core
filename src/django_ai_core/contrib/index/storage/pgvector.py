@@ -2,28 +2,30 @@ from typing import Type, Generator, TYPE_CHECKING
 
 from pgvector.django import VectorField, CosineDistance
 
-from .base import StorageProvider, StorageQuerySet, StorageDocument
+from .base import StorageProvider, BaseStorageQuerySet, BaseStorageDocument
 from ..schema import EmbeddedDocument
 
 if TYPE_CHECKING:
     from .pgvector_model import PgVectorModelMixin
 
 
-class PgVectorQuerySet(StorageQuerySet["PgVectorProvider"]):
+class PgVectorQuerySet(BaseStorageQuerySet["PgVectorProvider"]):
     """QuerySet implementation for PgVectorProvider."""
 
-    def get_instance(self, val: "PgVectorModelMixin") -> StorageDocument:
-        """Convert a Django model instance to a StorageDocument."""
+    def get_instance(self, val: "PgVectorModelMixin") -> BaseStorageDocument:
+        """Convert a Django model instance to a BaseStorageDocument."""
         return self.model(
             document_key=val.document_key,
             content=val.content,
             metadata=val.metadata,
         )
 
-    def run_query(self) -> Generator[StorageDocument, None, None]:
+    def run_query(self) -> Generator[BaseStorageDocument, None, None]:
         """Execute the query and return the results."""
         if not self.storage_provider:
             raise ValueError("Storage provider is required")
+
+        storage_provider = self.storage_provider
 
         filter_map = {filter[0]: filter[1] for filter in self.filters}
 
@@ -34,7 +36,7 @@ class PgVectorQuerySet(StorageQuerySet["PgVectorProvider"]):
         if self.ordering:
             raise NotImplementedError("Ordering is not supported for querying")
 
-        model = self.storage_provider.model
+        model = storage_provider.model
         if not model:
             raise ValueError("Model class is required")
 
@@ -73,7 +75,7 @@ class PgVectorProvider(StorageProvider):
         storage = PgVectorProvider(model=MyVectorModel)
     """
 
-    queryset_cls = PgVectorQuerySet
+    base_queryset_cls = PgVectorQuerySet
 
     def __init__(
         self,

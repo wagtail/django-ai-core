@@ -13,7 +13,11 @@ from .models import Book, Film, VideoGame, MediaVectorModel
 @registry.register()
 class MediaIndex(VectorIndex):
     sources = [
-        ModelSource(model=Book, fields=["title", "description"]),
+        ModelSource(
+            model=Book,
+            content_fields=["title", "description"],
+            metadata_fields=["description"],
+        ),
         ModelSource(model=Film),
         ModelSource(model=VideoGame),
     ]

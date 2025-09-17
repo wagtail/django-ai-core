@@ -1,14 +1,14 @@
 from typing import TYPE_CHECKING
 
-from .base import StorageProvider, StorageQuerySet, StorageDocument
+from .base import StorageProvider, BaseStorageQuerySet, BaseStorageDocument
 from ..schema import EmbeddedDocument
 
 if TYPE_CHECKING:
     from llama_index.core.vector_stores.types import BasePydanticVectorStore
 
 
-class LlamaIndexQuerySet(StorageQuerySet["LlamaIndexProvider"]):
-    def get_instance(self, val) -> StorageDocument:
+class LlamaIndexQuerySet(BaseStorageQuerySet["LlamaIndexProvider"]):
+    def get_instance(self, val) -> BaseStorageDocument:
         if self.model:
             return self.model(
                 document_key=val.document_key,
@@ -23,6 +23,8 @@ class LlamaIndexQuerySet(StorageQuerySet["LlamaIndexProvider"]):
 
         if not self.storage_provider:
             raise ValueError("Storage provider is required")
+
+        storage_provider = self.storage_provider
 
         filter_map = {filter[0]: filter[1] for filter in self.filters}
 
@@ -40,10 +42,10 @@ class LlamaIndexQuerySet(StorageQuerySet["LlamaIndexProvider"]):
             similarity_top_k=self._top_k,
             filters=metadata_filters,
         )
-        if self.storage_provider.vector_store is None:
+        if storage_provider.vector_store is None:
             raise ValueError("Vector store is required")
 
-        response = self.storage_provider.vector_store.query(query)
+        response = storage_provider.vector_store.query(query)
 
         if not response or not response.nodes:
             return
@@ -55,7 +57,7 @@ class LlamaIndexQuerySet(StorageQuerySet["LlamaIndexProvider"]):
 class LlamaIndexProvider(StorageProvider):
     """Vector storage using LlamaIndex vector stores."""
 
-    queryset_cls = LlamaIndexQuerySet
+    base_queryset_cls = LlamaIndexQuerySet
 
     def __init__(self, vector_store: "BasePydanticVectorStore | None" = None):
         if vector_store is None:
