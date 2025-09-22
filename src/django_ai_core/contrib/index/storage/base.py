@@ -1,25 +1,10 @@
-from typing import Protocol, ClassVar, Generic, TypeVar, Iterator, Any, Iterable
+from abc import ABC, abstractmethod
+from typing import ClassVar, Generic, TypeVar, Iterator, Any, Iterable
 
 from ..schema import EmbeddedDocument
 from queryish import VirtualModel, Queryish
 
 StorageProviderType = TypeVar("StorageProviderType", bound="StorageProvider")
-
-"""
-Storage providers implement an interface for storing documents in vector storage backends, as well as for querying from them.
-
-The query interface uses Queryish so that results behave like Django QuerySets.
-
-There's some auto-class generation oddities going on here so for clarity:
-
-- Each storage provider implements
-    - a subclass of StorageProvider (defining the provider configuration and how to add/delete data)
-    - a subclass of BaseStorageQuerySet (defining how to query data)
-- The StorageProvider class is provided with a `base_queryset_cls` classvar which tells it what base queryset to use.
-- The StorageProvider's `document_cls` property generates a Queryish Virtual Model from BaseStorageDocument, setting a `base_queryset_class`
-- When a VirtualModel (BaseStorageDocument in this case) class is created, Queryish generates a new queryset class based on `base_queryset_class`.
-
-"""
 
 
 class BaseStorageQuerySet(Queryish, Generic[StorageProviderType]):
@@ -27,6 +12,9 @@ class BaseStorageQuerySet(Queryish, Generic[StorageProviderType]):
 
     # Defaults to None even though this isn't a valid type as Queryish
     # uses 'hasattr' to check if it can copy a Meta attribute from the Virtual Model
+    # Subclasses do not need to specify storage_provider or model - these
+    # are automatically added to the generated QuerySet class by Queryish,
+    # based on the values provided in BaseStorageDocument.Meta
     storage_provider: StorageProviderType = None  # type: ignore
     model: type["BaseStorageDocument"]
 
@@ -63,7 +51,7 @@ class BaseStorageDocument(VirtualModel):
         return self.document_key
 
 
-class StorageProvider(Protocol):
+class StorageProvider(ABC):
     """Base class for vector storage backends."""
 
     base_queryset_cls: ClassVar[type[BaseStorageQuerySet]]
@@ -92,14 +80,17 @@ class StorageProvider(Protocol):
             {"Meta": meta, "base_query_class": self.base_queryset_cls},
         )
 
+    @abstractmethod
     def add(self, documents: Iterable["EmbeddedDocument"]):
         """Store documents in the vector database."""
-        ...
+        pass
 
+    @abstractmethod
     def delete(self, document_keys: Iterable[str]):
         """Delete documents by their keys."""
-        ...
+        pass
 
+    @abstractmethod
     def clear(self):
         """Clear the vector database."""
         ...
