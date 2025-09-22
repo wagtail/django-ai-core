@@ -18,7 +18,7 @@ class EmbeddingTransformer(ABC):
         pass
 
     @abstractmethod
-    def transform(
+    def embed_documents(
         self, documents: Iterable["Document"], batch_size: int = 100
     ) -> Iterable["EmbeddedDocument"]:
         """Add embeddings to multiple documents efficiently."""
@@ -45,7 +45,7 @@ class CoreEmbeddingTransformer(EmbeddingTransformer):
         """Embed a string using the core embedding API."""
         return self.llm_service.embedding(text).data[0].embedding
 
-    def transform(
+    def embed_documents(
         self, documents: list["Document"], batch_size: int = 100
     ) -> list["EmbeddedDocument"]:
         """Add embedding vectors to multiple documents using the core embedding API.

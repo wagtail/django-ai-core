@@ -182,7 +182,7 @@ class ModelSource(ObjectSource):
         metadata = self.get_metadata(obj)
         content = self.get_content(obj)
 
-        for idx, document in enumerate(self.chunk_transformer.transform(content)):
+        for document in self.chunk_transformer.transform(content):
             yield Document(
                 document_key=self.get_document_key(obj),
                 content=document,

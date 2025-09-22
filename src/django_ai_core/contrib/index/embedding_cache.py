@@ -129,7 +129,7 @@ class CachedEmbeddingTransformer(EmbeddingTransformer):
             self.cache_backend.store_embedding(text, self.transformer_id, result)
             return result
 
-    def transform(
+    def embed_documents(
         self, documents: list["Document"], batch_size: int = 100
     ) -> list["EmbeddedDocument"]:
         """Transform multiple documents with caching.
@@ -177,7 +177,7 @@ class CachedEmbeddingTransformer(EmbeddingTransformer):
 
         # Process uncached documents in batch
         if uncached_documents:
-            embedded_documents = self.base_transformer.transform(
+            embedded_documents = self.base_transformer.embed_documents(
                 uncached_documents, batch_size=batch_size
             )
 

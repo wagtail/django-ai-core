@@ -104,7 +104,7 @@ class QueryHandler:
             )
 
         documents = source_to_use.objects_to_documents(obj)
-        embedded_documents = self.embedding_transformer.transform(documents)
+        embedded_documents = self.embedding_transformer.embed_documents(documents)
         # Just use the first document as the query embedding
         query_embedding = embedded_documents[0].vector
         queryset_cls = self._build_result_query_set_cls()

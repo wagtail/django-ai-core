@@ -58,7 +58,7 @@ class VectorIndex:
     def update(self, documents: Iterable["Document"]):
         # Embed documents
         logger.info("Embedding documents")
-        embedded_documents = self.embedding_transformer.transform(
+        embedded_documents = self.embedding_transformer.embed_documents(
             documents, batch_size=100
         )
 
