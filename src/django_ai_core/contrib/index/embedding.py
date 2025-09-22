@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Iterable
 from .schema import EmbeddedDocument, Document
 
 from django_ai_core.llm import LLMService
@@ -18,8 +19,8 @@ class EmbeddingTransformer(ABC):
 
     @abstractmethod
     def transform(
-        self, documents: list["Document"], batch_size: int = 100
-    ) -> list["EmbeddedDocument"]:
+        self, documents: Iterable["Document"], batch_size: int = 100
+    ) -> Iterable["EmbeddedDocument"]:
         """Add embeddings to multiple documents efficiently."""
         pass
 

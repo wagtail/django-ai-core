@@ -1,36 +1,28 @@
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    ClassVar,
-)
+from typing import TYPE_CHECKING, Any, ClassVar, Iterable
 import logging
-from queryish import VirtualModel
-from .query import QueryHandler
 
 if TYPE_CHECKING:
+    from .schema import Document
     from .storage.base import StorageProvider
-    from .query import ResultQuerySet
+    from .query import ResultQuerySetMixin
     from .embedding import EmbeddingTransformer
     from .source import Source
+    from .query import QueryHandler
 
 
 logger = logging.getLogger(__name__)
-
-
-__all__ = [
-    "VectorIndex",
-    "IndexRegistry",
-]
 
 
 class VectorIndex:
     sources: ClassVar[list["Source"]]
     embedding_transformer: ClassVar["EmbeddingTransformer"]
     storage_provider: ClassVar["StorageProvider"]
-    metadata: ClassVar[dict[str, Any] | None] = None
     query_handler: "QueryHandler"
+    metadata: ClassVar[dict[str, Any] | None] = None
 
     def __init__(self):
+        from .query import QueryHandler
+
         self.query_handler = QueryHandler()
         self.query_handler.configure(
             storage_provider=self.storage_provider,
@@ -59,24 +51,30 @@ class VectorIndex:
             logger.warning("No documents provided by sources")
             return self
 
-        # Embed Documents
-        logger.info(f"Embedding {len(documents)} documents")
+        self.update(documents)
+
+        return self
+
+    def update(self, documents: Iterable["Document"]):
+        # Embed documents
+        logger.info("Embedding documents")
         embedded_documents = self.embedding_transformer.transform(
             documents, batch_size=100
         )
 
-        # Store in vector database
+        # Add documents to storage provider
         if embedded_documents:
-            logger.info(
-                f"Storing {len(embedded_documents)} documents in vector database"
-            )
+            logger.info("Storing documents in vector database")
             self.storage_provider.add(embedded_documents)
         else:
             logger.warning("No embedded documents produced by the pipeline")
 
-        return self
+        # Alert sources that we have updated
+        for source in self.sources:
+            if hasattr(source, "post_index_update"):
+                source.post_index_update(self)
 
-    def search(self, query: str) -> "ResultQuerySet":
+    def search(self, query: str) -> "ResultQuerySetMixin":
         """Search the index and return a queryish object of results.
         Args:
             query: The search query string
@@ -85,7 +83,7 @@ class VectorIndex:
         """
         return self.query_handler.search(query)
 
-    def find_similar(self, obj: object) -> "ResultQuerySet":
+    def find_similar(self, obj: object) -> "ResultQuerySetMixin":
         """Find objects similar to the given object.
         Args:
             obj: The object to find similar objects to

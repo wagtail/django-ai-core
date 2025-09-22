@@ -1,4 +1,4 @@
-from typing import Protocol, ClassVar, Generic, TypeVar, Generator, Any
+from typing import Protocol, ClassVar, Generic, TypeVar, Iterator, Any, Iterable
 
 from ..schema import EmbeddedDocument
 from queryish import VirtualModel, Queryish
@@ -25,7 +25,9 @@ There's some auto-class generation oddities going on here so for clarity:
 class BaseStorageQuerySet(Queryish, Generic[StorageProviderType]):
     """Base Queyrish QuerySet. Subclasses are generated dynamically by Queryish."""
 
-    storage_provider: StorageProviderType = None  # Defaults to None even though this isn't a valid type as Queryish uses 'hasattr' to check if it can copy a Meta attribute from the Virtual Model
+    # Defaults to None even though this isn't a valid type as Queryish
+    # uses 'hasattr' to check if it can copy a Meta attribute from the Virtual Model
+    storage_provider: StorageProviderType = None  # type: ignore
     model: type["BaseStorageDocument"]
 
     def __init__(self, *args, **kwargs):
@@ -38,7 +40,7 @@ class BaseStorageQuerySet(Queryish, Generic[StorageProviderType]):
         clone._top_k = k
         return clone
 
-    def run_query(self) -> Generator["BaseStorageDocument", None, None]:
+    def run_query(self) -> Iterator["BaseStorageDocument"]:
         """Execute the query and return the results."""
         raise NotImplementedError
 
@@ -90,11 +92,11 @@ class StorageProvider(Protocol):
             {"Meta": meta, "base_query_class": self.base_queryset_cls},
         )
 
-    def add(self, documents: list["EmbeddedDocument"]):
+    def add(self, documents: Iterable["EmbeddedDocument"]):
         """Store documents in the vector database."""
         ...
 
-    def delete(self, document_keys: list[str]):
+    def delete(self, document_keys: Iterable[str]):
         """Delete documents by their keys."""
         ...
 

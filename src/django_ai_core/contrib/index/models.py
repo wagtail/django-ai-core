@@ -1,5 +1,13 @@
 import hashlib
+from typing import TYPE_CHECKING
 from django.db import models
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
+
+from .base import registry
+
+if TYPE_CHECKING:
+    from .base import VectorIndex
 
 
 class EmbeddingCache(models.Model):
@@ -131,3 +139,103 @@ class DocumentEmbedding(models.Model):
 
     def __str__(self):
         return f"DocumentEmbedding({self.document_key})"
+
+
+class ModelSourceIndex(models.Model):
+    """Tracks which model instances are indexed in which vector indexes."""
+
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey("content_type", "object_id")
+
+    index_name = models.CharField(max_length=255)
+
+    source_id = models.CharField(max_length=255)
+
+    indexed_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["content_type", "object_id"]),
+            models.Index(fields=["index_name"]),
+            models.Index(fields=["source_id"]),
+        ]
+        unique_together = [
+            ("content_type", "object_id", "index_name", "source_id"),
+        ]
+
+    @classmethod
+    def register(cls, obj, index_name, source_id):
+        """Register an object as being indexed in the specified index."""
+        content_type = ContentType.objects.get_for_model(obj)
+
+        cls.objects.update_or_create(
+            content_type=content_type,
+            object_id=obj.pk,
+            index_name=index_name,
+            source_id=source_id,
+        )
+
+    @classmethod
+    def unregister(cls, obj, index_name=None, source_id=None):
+        """Remove registration for an object from one or all indexes."""
+        content_type = ContentType.objects.get_for_model(obj)
+
+        filters = {
+            "content_type": content_type,
+            "object_id": obj.pk,
+        }
+
+        if index_name:
+            filters["index_name"] = index_name
+
+        if source_id:
+            filters["source_id"] = source_id
+
+        cls.objects.filter(**filters).delete()
+
+    @classmethod
+    def get_indexed_objects(cls, index_name, source_id=None):
+        """Get all objects indexed in the specified index and optionally source."""
+        filters = {"index_name": index_name}
+
+        if source_id:
+            filters["source_id"] = source_id
+
+        # Get all registrations for this index
+        registrations = cls.objects.filter(**filters)
+
+        # Group by content type for efficient fetching
+        by_content_type = {}
+        for reg in registrations:
+            if reg.content_type_id not in by_content_type:
+                by_content_type[reg.content_type_id] = []
+            by_content_type[reg.content_type_id].append(reg.object_id)
+
+        # Fetch objects by content type
+        results = []
+        for content_type_id, object_ids in by_content_type.items():
+            content_type = ContentType.objects.get_for_id(content_type_id)
+            model_class = content_type.model_class()
+
+            # Fetch objects in bulk
+            objects = model_class.objects.filter(pk__in=object_ids)
+            results.extend(objects)
+
+        return results
+
+    @classmethod
+    def get_indexes_for_object(cls, obj) -> list["VectorIndex"]:
+        """Get all indexes that contain the specified object."""
+        content_type = ContentType.objects.get_for_model(obj)
+
+        registrations = cls.objects.filter(
+            content_type=content_type,
+            object_id=obj.pk,
+        )
+
+        indexes = []
+        for registration in registrations:
+            indexes.append(registry.get(registration.index_name))
+
+        return indexes

@@ -1,5 +1,4 @@
-from abc import ABC, abstractmethod
-from typing import TypeVar
+from typing import TypeVar, TYPE_CHECKING, Iterable, Protocol, runtime_checkable
 from django.db import models
 from django.db.models import QuerySet
 
@@ -7,12 +6,17 @@ from .schema import Document
 from .chunking import ChunkTransformer, SimpleChunkTransformer
 
 
+if TYPE_CHECKING:
+    from .base import VectorIndex
+
+
 ObjectType = TypeVar("ObjectType")
 
 DEFAULT_DOCUMENT_SIZE = 2000
 
 
-class Source(ABC):
+@runtime_checkable
+class Source(Protocol):
     """Base source for providing documents for the index."""
 
     @property
@@ -20,33 +24,40 @@ class Source(ABC):
         """Get unique identifier for this source."""
         return self.__class__.__name__
 
-    @abstractmethod
-    def object_belongs_to_source(self, obj: object) -> bool:
-        """Check if the given object belongs to this source."""
-        pass
-
-    @abstractmethod
-    def document_belongs_to_source(self, document_key: str) -> bool:
-        """Check if the given object key belongs to this source"""
-        pass
-
-    @abstractmethod
-    def get_documents_for_object(self, obj: object) -> list[Document]:
-        """Get documents for the given object."""
-        pass
-
-    @abstractmethod
-    def get_documents(self) -> list[Document]:
+    def get_documents(self) -> Iterable[Document]:
         """Get all documents from this source."""
-        pass
+        ...
 
-    @abstractmethod
-    def get_objects_from_documents(self, documents: list[Document]) -> list[object]:
+    def provides_document(self, document: Document) -> bool:
+        """Check if the given Document is provided by this source"""
+        ...
+
+    def post_index_update(self, index: "VectorIndex"):
+        """Called after an index using this source is built or updated"""
+        ...
+
+
+@runtime_checkable
+class ObjectSource(Source, Protocol):
+    """A Source that adapts a different object, turning it in to a Document, and supporting turning
+    Documents back to the original object."""
+
+    def objects_to_documents(
+        self, obj: object | Iterable[object]
+    ) -> Iterable[Document]:
+        """Get documents for the given objects."""
+        ...
+
+    def objects_from_documents(self, documents: Iterable[Document]) -> Iterable[object]:
         """Convert documents back to original objects."""
-        pass
+        ...
+
+    def provides_object(self, obj: object) -> bool:
+        """Check if the given object belongs to this source."""
+        ...
 
 
-class ModelSource(Source):
+class ModelSource(ObjectSource):
     """Source for Django models with queryset support."""
 
     def __init__(
@@ -154,51 +165,54 @@ class ModelSource(Source):
         """Use Django model label as source ID."""
         return self.model._meta.label
 
-    def object_belongs_to_source(self, obj: object) -> bool:
+    def provides_object(self, obj: object) -> bool:
         """Check if the given object belongs to this source."""
         return self.model is type(obj)
 
-    def document_belongs_to_source(self, document_key: str) -> bool:
-        return document_key.split(":")[0] == self.source_id
+    def provides_document(self, document: Document) -> bool:
+        return document.document_key.split(":")[0] == self.source_id
 
-    def get_documents_for_object(self, obj: models.Model) -> list[Document]:
-        """Get documents for the given object."""
+    def get_document_key(self, obj) -> str:
+        return f"{self.source_id}:{obj.pk}"
 
-        if not self.object_belongs_to_source(obj):
+    def _object_to_documents(self, obj: models.Model) -> Iterable[Document]:
+        if not self.provides_object(obj):
             raise ValueError("Object does not belong to this source")
 
         metadata = self.get_metadata(obj)
         content = self.get_content(obj)
 
-        documents = []
-
         for idx, document in enumerate(self.chunk_transformer.transform(content)):
-            documents.append(
-                Document(
-                    document_key=f"{obj._meta.label}:{obj.pk}:{idx}",
-                    content=document,
-                    metadata=metadata,
-                )
+            yield Document(
+                document_key=self.get_document_key(obj),
+                content=document,
+                metadata=metadata,
             )
-        return documents
 
-    def get_documents(self) -> list[Document]:
+    def objects_to_documents(
+        self, objs: models.Model | Iterable[models.Model]
+    ) -> Iterable[Document]:
+        """Get documents for the given objects."""
+
+        if isinstance(objs, models.Model):
+            objs = [objs]
+
+        for obj in objs:
+            yield from self._object_to_documents(obj)
+
+    def get_documents(self) -> Iterable[Document]:
         """Convert querysets to documents."""
-        documents = []
-
         for obj in self.queryset:
-            documents.extend(self.get_documents_for_object(obj))
+            yield from self.objects_to_documents(obj)
 
-        return documents
-
-    def get_objects_from_documents(
-        self, documents: list[Document]
-    ) -> list[models.Model]:
+    def objects_from_documents(
+        self, documents: Iterable[Document]
+    ) -> Iterable[models.Model]:
         """Convert documents back to Django model instances if they were created by this source."""
 
         pks = []
         for document in documents:
-            if self.document_belongs_to_source(document.document_key):
+            if self.provides_document(document):
                 pks.append(document.metadata["pk"])
 
         if not pks:
@@ -214,11 +228,18 @@ class ModelSource(Source):
         pk_to_object = {obj.pk: obj for obj in objects}
 
         # Return objects in the same order as documents, skipping missing ones
-        result = []
         for document in documents:
-            if self.document_belongs_to_source(document.document_key):
+            if self.provides_document(document):
                 pk = document.metadata["pk"]
                 if pk in pk_to_object:
-                    result.append(pk_to_object[pk])
+                    yield pk_to_object[pk]
 
-        return result
+    def post_index_update(self, index):
+        from .models import ModelSourceIndex
+
+        ModelSourceIndex.objects.filter(
+            index_name=index, source_id=self.source_id
+        ).delete()
+
+        for obj in self.queryset:
+            ModelSourceIndex.register(obj, index, self.source_id)
