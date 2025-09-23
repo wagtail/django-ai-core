@@ -16,6 +16,13 @@ DEFAULT_DOCUMENT_SIZE = 2000
 
 
 @runtime_checkable
+class HasPostIndexUpdateHook(Protocol):
+    def post_index_update(self, index: "VectorIndex"):
+        """Called after an index using this source is built or updated"""
+        ...
+
+
+@runtime_checkable
 class Source(Protocol):
     """Base source for providing documents for the index."""
 
@@ -30,10 +37,6 @@ class Source(Protocol):
 
     def provides_document(self, document: Document) -> bool:
         """Check if the given Document is provided by this source"""
-        ...
-
-    def post_index_update(self, index: "VectorIndex"):
-        """Called after an index using this source is built or updated"""
         ...
 
 
@@ -189,6 +192,11 @@ class ModelSource(ObjectSource):
                 metadata=metadata,
             )
 
+    def get_documents(self) -> Iterable[Document]:
+        """Convert querysets to documents."""
+        for obj in self.queryset:
+            yield from self.objects_to_documents(obj)
+
     def objects_to_documents(
         self, objs: models.Model | Iterable[models.Model]
     ) -> Iterable[Document]:
@@ -199,11 +207,6 @@ class ModelSource(ObjectSource):
 
         for obj in objs:
             yield from self._object_to_documents(obj)
-
-    def get_documents(self) -> Iterable[Document]:
-        """Convert querysets to documents."""
-        for obj in self.queryset:
-            yield from self.objects_to_documents(obj)
 
     def objects_from_documents(
         self, documents: Iterable[Document]

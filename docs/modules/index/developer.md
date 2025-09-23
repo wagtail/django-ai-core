@@ -1,4 +1,4 @@
-# Index Developer Docs
+# Developer Docs
 
 !!! note "Technical notes"
 

@@ -6,7 +6,8 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "any-llm-sdk>=0.17.1",
-    "queryish>=0.2.0"
+    "mkdocstrings>=0.30.1",
+    "queryish>=0.2.0",
 ]
 
 [dependency-groups]

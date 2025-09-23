@@ -1,18 +1,16 @@
-from typing import Type, Generator, TYPE_CHECKING
+from typing import Type, Generator
 
-from pgvector.django import VectorField, CosineDistance
+from pgvector.django import CosineDistance
 
-from .base import StorageProvider, BaseStorageQuerySet, BaseStorageDocument
-from ..schema import EmbeddedDocument
-
-if TYPE_CHECKING:
-    from .pgvector_model import PgVectorModelMixin
+from ..base import StorageProvider, BaseStorageQuerySet, BaseStorageDocument
+from ...schema import EmbeddedDocument
+from .models import PgVectorEmbedding, BasePgVectorEmbedding
 
 
 class PgVectorQuerySet(BaseStorageQuerySet["PgVectorProvider"]):
     """QuerySet implementation for PgVectorProvider."""
 
-    def get_instance(self, val: "PgVectorModelMixin") -> BaseStorageDocument:
+    def get_instance(self, val: "BasePgVectorEmbedding") -> BaseStorageDocument:
         """Convert a Django model instance to a BaseStorageDocument."""
         return self.model(
             document_key=val.document_key,
@@ -40,12 +38,7 @@ class PgVectorQuerySet(BaseStorageQuerySet["PgVectorProvider"]):
         if not model:
             raise ValueError("Model class is required")
 
-        # Get the field name for the embedding vector
-        embedding_field = model.embedding_field
-
-        # Build the query with similarity search
-        # Default to cosine similarity, but can be configurable in the future
-        queryset = model.objects.order_by(CosineDistance(embedding_field, embedding))
+        queryset = model.objects.order_by(CosineDistance("vector", embedding))
 
         # Apply metadata filters if any
         for key, value in filter_map.items():
@@ -60,34 +53,25 @@ class PgVectorQuerySet(BaseStorageQuerySet["PgVectorProvider"]):
 class PgVectorProvider(StorageProvider):
     """
     Vector storage using PostgreSQL with pgvector extension.
-
-    This storage provider allows storing vector embeddings in a PostgreSQL database
-    using a custom Django model that includes the PgVectorModelMixin.
-
-    Example:
-        class MyVectorModel(PgVectorModelMixin, models.Model):
-            embedding = VectorField(dimensions=768)
-
-            class Meta:
-                app_label = 'myapp'
-
-        # Create the storage provider with the model
-        storage = PgVectorProvider(model=MyVectorModel)
     """
 
     base_queryset_cls = PgVectorQuerySet
 
     def __init__(
         self,
-        model: Type["PgVectorModelMixin"],
+        model: Type["BasePgVectorEmbedding"] | None = None,
     ):
         """
         Initialize the PgVectorProvider.
 
         Args:
-            model: A Django model class that includes the PgVectorModelMixin.
+            model: A Django model class that subclasses BasePgVectorEmbedding.
         """
-        self.model = model
+        if model:
+            self.model = model
+        else:
+            self.model = PgVectorEmbedding
+
         required_fields = [
             "document_key",
             "content",
@@ -95,19 +79,11 @@ class PgVectorProvider(StorageProvider):
             "vector",
         ]
 
-        # Verify that the model has the required fields
         for field in required_fields:
             if not hasattr(self.model, field):
                 raise ValueError(
                     f"Model class {self.model.__name__} must include '{field}' field"
                 )
-
-        # Verify that the embedding field is a VectorField
-        field = self.model._meta.get_field(self.model.embedding_field)
-        if not isinstance(field, VectorField):
-            raise ValueError(
-                f"Field '{self.model.embedding_field}' must be a VectorField, got {type(field)}"
-            )
 
     def add(self, documents: list[EmbeddedDocument]) -> None:
         """
@@ -146,7 +122,7 @@ class PgVectorProvider(StorageProvider):
             existing_instances = [i for i in instances if i.pk in existing_keys]
             self.model.objects.bulk_update(
                 existing_instances,
-                ["content", "metadata", self.model.embedding_field],
+                ["content", "metadata", "vector"],
             )
 
         # Bulk create new instances

@@ -6,7 +6,7 @@ if TYPE_CHECKING:
     from .storage.base import StorageProvider
     from .query import ResultQuerySetMixin
     from .embedding import EmbeddingTransformer
-    from .source import Source
+    from .source import Source, HasPostIndexUpdateHook
     from .query import QueryHandler
 
 
@@ -71,7 +71,7 @@ class VectorIndex:
 
         # Alert sources that we have updated
         for source in self.sources:
-            if hasattr(source, "post_index_update"):
+            if isinstance(source, HasPostIndexUpdateHook)
                 source.post_index_update(self)
 
     def search(self, query: str) -> "ResultQuerySetMixin":

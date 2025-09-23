@@ -24,6 +24,6 @@ def handle_model_save(sender, instance, **kwargs):
 def handle_model_delete(sender, instance, **kwargs):
     """When a model is deleted, remove it from all indexes."""
 
-    model_label = f"{sender._meta.app_label}.{sender._meta.model_name}"
-
     registered_indexes = ModelSourceIndex.get_indexes_for_object(instance)
+
+    # handle object deletion

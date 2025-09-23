@@ -9,7 +9,7 @@ from django_ai_core.contrib.index.source import ModelSource, Source
 from django_ai_core.contrib.index.schema import Document
 from django_ai_core.contrib.index.storage import PgVectorProvider
 
-from .models import Book, Film, VideoGame, MediaVectorModel
+from .models import Book, Film, VideoGame
 
 
 class PokemonSource(Source):
@@ -22,25 +22,19 @@ class PokemonSource(Source):
             details = requests.get(
                 f"{base_url}/pokemon-species/{pokemon['name']}"
             ).json()
-            yield from self.objects_to_documents(details)
-
-    def get_document_key(self, obj):
-        return f"pokemon:{obj['name']}"
-
-    def objects_to_documents(self, objs):
-        if isinstance(objs, dict):
-            objs = [objs]
-
-        for obj in objs:
-            content = f"{obj['name']}\n"
-            for entry in obj["flavor_text_entries"]:
+            content = f"{details['name']}\n"
+            for entry in details["flavor_text_entries"]:
                 if entry["language"]["name"] == "en":
                     content += f"{entry['flavor_text']}\n"
+            key = f"pokemon:{details['name']}"
             yield Document(
-                document_key=self.get_document_key(obj),
+                document_key=key,
                 content=content,
                 metadata={},
             )
+
+    def provides_document(self, document: Document) -> bool:
+        return document.document_key.startswith("pokemon")
 
 
 @registry.register()
@@ -54,7 +48,7 @@ class MediaIndex(VectorIndex):
         ModelSource(model=Film),
         ModelSource(model=VideoGame),
     ]
-    storage_provider = PgVectorProvider(model=MediaVectorModel)
+    storage_provider = PgVectorProvider()
     embedding_transformer = CachedEmbeddingTransformer(
         base_transformer=CoreEmbeddingTransformer(
             llm_service=LLMService(
@@ -68,7 +62,7 @@ class MediaIndex(VectorIndex):
 @registry.register()
 class PokemonIndex(VectorIndex):
     sources = [PokemonSource()]
-    storage_provider = PgVectorProvider(model=MediaVectorModel)
+    storage_provider = PgVectorProvider()
     embedding_transformer = CachedEmbeddingTransformer(
         base_transformer=CoreEmbeddingTransformer(
             llm_service=LLMService(

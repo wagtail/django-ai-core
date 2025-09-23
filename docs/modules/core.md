@@ -10,7 +10,7 @@ The Core module provides shared infrastructure that powers all other modules in 
     - Cost calculations
     - Rate limiting
 
-## LLM
+## LLM Service
 
 Django AI Core provides an `LLMService` which can be used for requesting completions or embeddings from many AI providers.
 

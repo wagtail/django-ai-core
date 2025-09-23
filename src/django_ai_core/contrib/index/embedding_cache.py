@@ -130,7 +130,7 @@ class CachedEmbeddingTransformer(EmbeddingTransformer):
             return result
 
     def embed_documents(
-        self, documents: list["Document"], batch_size: int = 100
+        self, documents: list["Document"], *, batch_size: int = 100
     ) -> list["EmbeddedDocument"]:
         """Transform multiple documents with caching.
 
