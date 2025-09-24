@@ -41,7 +41,8 @@ class InMemoryProvider(StorageProvider):
 
     base_queryset_cls = InMemoryQuerySet
 
-    def __init__(self):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.documents: dict[str, "EmbeddedDocument"] = {}
 
     def add(self, documents: list["EmbeddedDocument"]):

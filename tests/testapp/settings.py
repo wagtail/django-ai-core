@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "testapp",
     "django_ai_core",
     "django_ai_core.contrib.index",
+    "django_ai_core.contrib.index.storage.pgvector",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",

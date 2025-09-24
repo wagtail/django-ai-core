@@ -1,10 +1,12 @@
-from typing import Type, Generator
+from typing import Type, Generator, TYPE_CHECKING
 
 from pgvector.django import CosineDistance
 
 from ..base import StorageProvider, BaseStorageQuerySet, BaseStorageDocument
 from ...schema import EmbeddedDocument
-from .models import PgVectorEmbedding, BasePgVectorEmbedding
+
+if TYPE_CHECKING:
+    from .models import BasePgVectorEmbedding
 
 
 class PgVectorQuerySet(BaseStorageQuerySet["PgVectorProvider"]):
@@ -38,7 +40,9 @@ class PgVectorQuerySet(BaseStorageQuerySet["PgVectorProvider"]):
         if not model:
             raise ValueError("Model class is required")
 
-        queryset = model.objects.order_by(CosineDistance("vector", embedding))
+        queryset = model.objects.filter(index_name=storage_provider.index_name)
+
+        queryset = queryset.order_by(CosineDistance("vector", embedding))
 
         # Apply metadata filters if any
         for key, value in filter_map.items():
@@ -57,22 +61,23 @@ class PgVectorProvider(StorageProvider):
 
     base_queryset_cls = PgVectorQuerySet
 
-    def __init__(
-        self,
-        model: Type["BasePgVectorEmbedding"] | None = None,
-    ):
+    def __init__(self, *, model: Type["BasePgVectorEmbedding"] | None = None, **kwargs):
         """
         Initialize the PgVectorProvider.
 
         Args:
             model: A Django model class that subclasses BasePgVectorEmbedding.
         """
+        super().__init__(**kwargs)
         if model:
             self.model = model
         else:
+            from .models import PgVectorEmbedding
+
             self.model = PgVectorEmbedding
 
         required_fields = [
+            "index_name",
             "document_key",
             "content",
             "metadata",
@@ -97,7 +102,9 @@ class PgVectorProvider(StorageProvider):
         for document in documents:
             # Check if the document already exists
             try:
-                instance = self.model.objects.get(document_key=document.document_key)
+                instance = self.model.objects.get(
+                    index_name=self.index_name, document_key=document.document_key
+                )
                 # Update the existing instance
                 instance.content = document.content
                 instance.metadata = document.metadata
@@ -105,6 +112,7 @@ class PgVectorProvider(StorageProvider):
             except self.model.DoesNotExist:
                 # Create a new instance
                 instance = self.model(
+                    index_name=self.index_name,
                     document_key=document.document_key,
                     content=document.content,
                     metadata=document.metadata,

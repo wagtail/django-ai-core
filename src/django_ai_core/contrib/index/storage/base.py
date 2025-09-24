@@ -56,6 +56,9 @@ class StorageProvider(ABC):
 
     base_queryset_cls: ClassVar[type[BaseStorageQuerySet]]
 
+    def __init__(self, *, index_name: str | None = None, **kwargs):
+        self.index_name = index_name
+
     @property
     def document_cls(self):
         """Build a document class for this storage provider."""

@@ -8,6 +8,7 @@ from django_ai_core.contrib.index import (
 from django_ai_core.contrib.index.source import ModelSource, Source
 from django_ai_core.contrib.index.schema import Document
 from django_ai_core.contrib.index.storage import PgVectorProvider
+from django_ai_core.contrib.index.storage.s3_vectors import S3VectorProvider
 
 from .models import Book, Film, VideoGame
 
@@ -43,12 +44,14 @@ class MediaIndex(VectorIndex):
         ModelSource(
             model=Book,
             content_fields=["title", "description"],
-            metadata_fields=["description"],
+            metadata_fields=["title", "description"],
         ),
         ModelSource(model=Film),
         ModelSource(model=VideoGame),
     ]
-    storage_provider = PgVectorProvider()
+    storage_provider = S3VectorProvider(
+        bucket_name="prototyping-vector-bucket", dimensions=1536
+    )
     embedding_transformer = CachedEmbeddingTransformer(
         base_transformer=CoreEmbeddingTransformer(
             llm_service=LLMService(

@@ -8,6 +8,7 @@ class BasePgVectorEmbedding(models.Model):
     Django model to be used with PgVectorProvider.
     """
 
+    index_name = models.CharField(max_length=255)
     document_key = models.CharField(max_length=255, primary_key=True)
     content = models.TextField()
     metadata = models.JSONField(default=dict)

@@ -59,7 +59,10 @@ class LlamaIndexProvider(StorageProvider):
 
     base_queryset_cls = LlamaIndexQuerySet
 
-    def __init__(self, vector_store: "BasePydanticVectorStore | None" = None):
+    def __init__(
+        self, *, vector_store: "BasePydanticVectorStore | None" = None, **kwargs
+    ):
+        super().__init__(**kwargs)
         if vector_store is None:
             from llama_index.core.vector_stores.simple import SimpleVectorStore
 

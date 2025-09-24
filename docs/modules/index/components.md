@@ -183,3 +183,7 @@ my_documents = [Document(...), # More documents]
 
 embedding_transformer.embed_documents(my_documents)
 ```
+
+### Storage Providers
+
+Storage Providers define where the index is created and how it is searched.

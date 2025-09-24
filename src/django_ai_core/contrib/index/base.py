@@ -1,4 +1,6 @@
 from typing import TYPE_CHECKING, Any, ClassVar, Iterable
+from django.utils.text import slugify
+from .source import HasPostIndexUpdateHook
 import logging
 
 if TYPE_CHECKING:
@@ -6,7 +8,7 @@ if TYPE_CHECKING:
     from .storage.base import StorageProvider
     from .query import ResultQuerySetMixin
     from .embedding import EmbeddingTransformer
-    from .source import Source, HasPostIndexUpdateHook
+    from .source import Source
     from .query import QueryHandler
 
 
@@ -20,6 +22,11 @@ class VectorIndex:
     query_handler: "QueryHandler"
     metadata: ClassVar[dict[str, Any] | None] = None
 
+    @property
+    def index_id(self):
+        class_name_slug = slugify(self.__class__.__name__)
+        return class_name_slug
+
     def __init__(self):
         from .query import QueryHandler
 
@@ -29,6 +36,9 @@ class VectorIndex:
             sources=self.sources,
             embedding_transformer=self.embedding_transformer,
         )
+
+        # Set the storage provider index name from the index ID
+        self.storage_provider.index_name = f"{self.index_id}_index"
 
     def build(self):
         """
@@ -71,7 +81,7 @@ class VectorIndex:
 
         # Alert sources that we have updated
         for source in self.sources:
-            if isinstance(source, HasPostIndexUpdateHook)
+            if isinstance(source, HasPostIndexUpdateHook):
                 source.post_index_update(self)
 
     def search(self, query: str) -> "ResultQuerySetMixin":
