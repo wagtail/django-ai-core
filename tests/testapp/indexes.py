@@ -54,7 +54,7 @@ class MediaIndex(VectorIndex):
     )
     embedding_transformer = CachedEmbeddingTransformer(
         base_transformer=CoreEmbeddingTransformer(
-            llm_service=LLMService(
+            llm_service=LLMService.create(
                 provider="openai",
                 model="text-embedding-3-small",
             )
@@ -68,7 +68,7 @@ class PokemonIndex(VectorIndex):
     storage_provider = PgVectorProvider()
     embedding_transformer = CachedEmbeddingTransformer(
         base_transformer=CoreEmbeddingTransformer(
-            llm_service=LLMService(
+            llm_service=LLMService.create(
                 provider="openai",
                 model="text-embedding-3-small",
             )

@@ -34,7 +34,7 @@ class SimplePromptAgent(Agent):
     ]
 
     def execute(self, *, prompt: str):
-        service = LLMService(provider="openai", model="gpt-4o")
+        service = LLMService.create(provider="openai", model="gpt-4o")
         response = service.completion(prompt)
 
 ```

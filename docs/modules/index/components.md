@@ -11,7 +11,7 @@ class MediaIndex(VectorIndex):
     # 2. Embedding transformers - how your source documents will be embedded
     embedding_transformer = CachedEmbeddingTransformer(
         base_transformer=CoreEmbeddingTransformer(
-            llm_service=LLMService(
+            llm_service=LLMService.create(
                 provider="openai",
                 model="text-embedding-3-small",
             )
@@ -147,7 +147,7 @@ from django_ai_core.llm import LLMService
 from django_ai_core.contrib.index import CoreEmbeddingTransformer
 
 embedding_transformer = CoreEmbddingTransformer(
-    llm_service=LLMService(
+    llm_service=LLMService.create(
         provider="openai",
         model="text-embedding-3-small"
     )
@@ -172,7 +172,7 @@ from django_ai_core.contrib.index import CoreEmbeddingTransformer, CachedEmbeddi
 
 embedding_transformer = CachedEmbeddingTransformer(
     base_transformer=CoreEmbddingTransformer(
-        llm_service=LLMService(
+        llm_service=LLMService.create(
             provider="openai",
             model="text-embedding-3-small"
         )

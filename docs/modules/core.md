@@ -18,14 +18,29 @@ It uses the [`any-llm`](https://mozilla-ai.github.io/any-llm/) package to provid
 
 To use the `LLMService`:
 
-```python
+````python
 
 from django_ai_core.llm import LLMService
 
-service = LLMService(
+service = LLMService.create(
     provider="openai",
     model="gpt-4o"
+)```
+
+You can also alternatively instantiate `LLMService` with your own client instance:
+
+````
+
+from any_llm import AnyLLM
+
+client = AnyLLM.create(
+provider="openai",
+model="gpt-4o"
 )
+
+service = LLMService(client=client)
+
+```
 
 # Completions
 response = service.completion("What is the airspeed velocity of an unladen swallow?")

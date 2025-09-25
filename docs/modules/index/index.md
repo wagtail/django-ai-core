@@ -40,7 +40,7 @@ The Index Module provides a vector indexing system for Django applications. It e
         storage_provider = PgVectorProvider(model=MediaVectorModel) # TODO: Use something easier to get started with?
         embedding_transformer = CachedEmbeddingTransformer(
             base_transformer=CoreEmbeddingTransformer(
-                llm_service=LLMService(
+                llm_service=LLMService.create(
                     provider="openai",
                     model="text-embedding-3-small",
                 )
