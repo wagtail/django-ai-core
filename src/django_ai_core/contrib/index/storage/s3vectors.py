@@ -73,6 +73,8 @@ class S3VectorProvider(StorageProvider):
 
     @property
     def index_name(self):
+        if not self._index_name:
+            raise ValueError("S3 Vector Provider must have an index_name configured")
         return self._index_name
 
     @index_name.setter

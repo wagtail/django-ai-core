@@ -187,3 +187,8 @@ embedding_transformer.embed_documents(my_documents)
 ### Storage Providers
 
 Storage Providers define where the index is created and how it is searched.
+
+Two storage providers are currently supported:
+
+-   [pgvector](./storage_providers/pgvector.md)
+-   [S3 Vectors](./storage_providers/s3vectors.md)

@@ -8,7 +8,7 @@ from django_ai_core.contrib.index import (
 from django_ai_core.contrib.index.source import ModelSource, Source
 from django_ai_core.contrib.index.schema import Document
 from django_ai_core.contrib.index.storage import PgVectorProvider
-from django_ai_core.contrib.index.storage.s3_vectors import S3VectorProvider
+from django_ai_core.contrib.index.storage.s3vectors import S3VectorProvider
 
 from .models import Book, Film, VideoGame
 

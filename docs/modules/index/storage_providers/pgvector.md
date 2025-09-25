@@ -2,6 +2,14 @@
 
 The pgvector storage provider uses the [pgvector](https://github.com/pgvector/pgvector) PostgreSQL extension to store your vector embeddings and enable querying across them.
 
+## Requirements
+
+To use the `pgvector` storage provider you must:
+
+-   Be using a PostgreSQL database for your Django application
+-   Have the `pgvector` extension available on your PostgreSQL database
+-   Have the `pgvector` Python package installed
+
 ## Usage
 
 The pgvector provider requires a Django model for a table where it can store embeddings. This package provides one you can use by adding `django_ai_core.contrib.index.storage.pgvector` to your `INSTALLED_APPS`:
@@ -63,4 +71,18 @@ from django_ai_core.contrib.index.storage.pgvector import PgVectorProvider
 from .models import CustomPgVectorEmbedding
 
 provider = PgVectorProvider(model=CustomPgVectorEmbedding)
+```
+
+In your migration for your custom model, add the `VectorExtension` migration operation to ensure the `pgvector` extension is enabled on your database:
+
+```
+from pgvector.django import VectorExtension
+from django.db import migrations, models
+
+
+class Migration(migrations.Migration):
+    operations = [
+        VectorExtension(),
+        # ...your operations
+    ]
 ```
