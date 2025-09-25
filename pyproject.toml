@@ -5,8 +5,7 @@ description = "Django AI Core provides developer-focused AI features for impleme
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "any-llm-sdk>=0.17.1",
-    "mkdocstrings>=0.30.1",
+    "any-llm-sdk==0.20.3",
     "queryish>=0.2.0",
 ]
 
@@ -21,12 +20,28 @@ dev = [
     "pytest>=8.4.1",
     "pytest-asyncio>=1.0.0",
 ]
-llama-index = [
-    "llama-index>=0.12.43",
-]
-pgvector = [
-    "pgvector>=0.4.1",
-]
 test = [
     "psycopg[binary]>=3.2.10",
+    "pgvector>=0.4.1",
+    "pytest-django>=4.11.1",
+]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "testapp.settings"
+pythonpath = ["./", "./tests"]
+log_level = "INFO"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]
+addopts = [
+    "-v",
+    "--tb=short",
+    "--strict-markers",
+    "--disable-warnings"
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+    "asyncio: marks tests as async"
 ]
