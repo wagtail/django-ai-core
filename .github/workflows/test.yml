@@ -90,7 +90,7 @@ jobs:
         runs-on: ubuntu-latest
         strategy:
             matrix:
-                python: ["3.11", "3.12", "3.13"]
+                python: ["3.13"]
 
         services:
             postgres:

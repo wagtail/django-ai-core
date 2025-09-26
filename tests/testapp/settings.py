@@ -169,3 +169,6 @@ AI_CORE_TESTAPP_STORAGE_PROVIDER = os.environ.get(
     "AI_CORE_TESTAPP_STORAGE_PROVIDER", None
 )
 AI_CORE_TESTAPP_LLM_PROVIDER = os.environ.get("AI_CORE_TESTAPP_LLM_PROVIDER", None)
+
+if AI_CORE_TESTAPP_STORAGE_PROVIDER == "pgvector":
+    INSTALLED_APPS += ["django_ai_core.contrib.index.storage.pgvector"]
