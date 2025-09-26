@@ -28,27 +28,7 @@ jobs:
                   python-version-file: "pyproject.toml"
             - uses: pre-commit/action@v3.0.1
 
-    test-unit:
-        runs-on: ubuntu-latest
-        strategy:
-            matrix:
-                python: ["3.11", "3.12", "3.13"]
-        steps:
-            - uses: actions/checkout@v5
-            - name: Set up Python
-              uses: actions/setup-python@v6
-              with:
-                  python-version-file: "pyproject.toml"
-            - name: Install uv
-              uses: astral-sh/setup-uv@v6
-              with:
-                  version: "0.8.22"
-            - name: Install test dependencies
-              run: uv sync --locked --group test
-            - name: Test
-              run: uv run tox -f unit
-
-    test-integration-db-sqlite:
+    test-sqlite:
         runs-on: ubuntu-latest
         strategy:
             matrix:
@@ -67,12 +47,12 @@ jobs:
             - name: Install test dependencies
               run: uv sync --locked --group test
             - name: Test
-              run: uv run tox -f postgres integration-db
+              run: uv run tox -f postgres integration-db -f unit
               env:
                   DATABASE_URL: postgres://postgres:postgres@localhost:5432/django_ai_core
                   DB: postgres
 
-    test-integration-db-postgres:
+    test-postgres:
         runs-on: ubuntu-latest
         strategy:
             matrix:
@@ -101,7 +81,7 @@ jobs:
             - name: Install test dependencies
               run: uv sync --locked --group test
             - name: Test
-              run: uv run tox -f postgres integration-db
+              run: uv run tox -f postgres integration-db -f unit
               env:
                   DATABASE_URL: postgres://postgres:postgres@localhost:5432/django_ai_core
                   DB: postgres
