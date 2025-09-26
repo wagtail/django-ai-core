@@ -1,5 +1,4 @@
 from typing import ClassVar
-import pytest
 from unittest import mock
 
 from django_ai_core.contrib.index.base import VectorIndex

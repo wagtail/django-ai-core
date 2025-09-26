@@ -1,4 +1,3 @@
-import pytest
 from django_ai_core.llm.prompt import Prompt
 
 
