@@ -47,7 +47,7 @@ jobs:
             - name: Install test dependencies
               run: uv sync --locked --group test
             - name: Test
-              run: uv run tox -f postgres integration-db -f unit
+              run: uv run tox
               env:
                   DATABASE_URL: postgres://postgres:postgres@localhost:5432/django_ai_core
                   DB: postgres
@@ -81,7 +81,7 @@ jobs:
             - name: Install test dependencies
               run: uv sync --locked --group test
             - name: Test
-              run: uv run tox -f postgres integration-db -f unit
+              run: uv run tox
               env:
                   DATABASE_URL: postgres://postgres:postgres@localhost:5432/django_ai_core
                   DB: postgres
