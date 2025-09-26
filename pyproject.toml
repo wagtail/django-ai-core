@@ -3,7 +3,7 @@ name = "django-ai-core"
 version = "0.1.0"
 description = "Django AI Core provides developer-focused AI features for implementing AI tooling in to Django sites."
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.11"
 dependencies = [
     "any-llm-sdk==0.20.3",
     "queryish>=0.2.0",
@@ -16,8 +16,6 @@ dev = [
     "mkdocs>=1.6.1",
     "mkdocs-awesome-nav>=3.2.0",
     "mkdocs-material>=9.6.20",
-    "pytest>=8.4.1",
-    "pytest-asyncio>=1.0.0",
 ]
 test = [
     "psycopg[binary]>=3.2.10",
@@ -27,6 +25,9 @@ test = [
     "pytest>=8.4.1",
     "dj-database-url>=3.0.1",
     "pytest-cov>=7.0.0",
+    "tox>=4.30.2",
+    "tox-gh-actions>=3.3.0",
+    "tox-uv>=1.28.0",
 ]
 
 [tool.uv]

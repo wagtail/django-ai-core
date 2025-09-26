@@ -1,0 +1,141 @@
+name: Django AI Core CI
+
+on:
+    push:
+        branches:
+            - main
+            - "stable/**"
+
+    pull_request:
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+permissions:
+    contents: read # to fetch code (actions/checkout)
+
+jobs:
+    lint:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v5
+              with:
+                  fetch-depth: 0
+            - name: Set up Python
+              uses: actions/setup-python@v6
+              with:
+                  python-version-file: "pyproject.toml"
+            - uses: pre-commit/action@v3.0.1
+
+    test-unit:
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                python: ["3.11", "3.12", "3.13"]
+        steps:
+            - uses: actions/checkout@v5
+            - name: Set up Python
+              uses: actions/setup-python@v6
+              with:
+                  python-version-file: "pyproject.toml"
+            - name: Install uv
+              uses: astral-sh/setup-uv@v6
+              with:
+                  version: "0.8.22"
+            - name: Install test dependencies
+              run: uv sync --locked --group test
+            - name: Test
+              run: tox -f unit
+
+    test-integration-db-sqlite:
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                python: ["3.11", "3.12", "3.13"]
+
+        steps:
+            - uses: actions/checkout@v5
+            - name: Set up Python
+              uses: actions/setup-python@v6
+              with:
+                  python-version-file: "pyproject.toml"
+            - name: Install uv
+              uses: astral-sh/setup-uv@v6
+              with:
+                  version: "0.8.22"
+            - name: Install test dependencies
+              run: uv sync --locked --group test
+            - name: Test
+              run: tox -f postgres integration-db
+              env:
+                  DATABASE_URL: postgres://postgres:postgres@localhost:5432/django_ai_core
+                  DB: postgres
+
+    test-integration-db-postgres:
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                python: ["3.11", "3.12", "3.13"]
+
+        services:
+            postgres:
+                image: postgres:17
+                env:
+                    POSTGRES_PASSWORD: postgres
+                ports:
+                    - 5432:5432
+                options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+        steps:
+            - uses: actions/checkout@v5
+            - name: Set up Python ${{ matrix.python }}
+              uses: actions/setup-python@v6
+              with:
+                  python-version: ${{ matrix.python }}
+            - name: Install uv
+              uses: astral-sh/setup-uv@v6
+              with:
+                  version: "0.8.22"
+                  python-version: ${{ matrix.python }}
+            - name: Install test dependencies
+              run: uv sync --locked --group test
+            - name: Test
+              run: tox -f postgres integration-db
+              env:
+                  DATABASE_URL: postgres://postgres:postgres@localhost:5432/django_ai_core
+                  DB: postgres
+
+    test-integration-pgvector:
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                python: ["3.11", "3.12", "3.13"]
+
+        services:
+            postgres:
+                image: pgvector:17-trixie
+                env:
+                    POSTGRES_PASSWORD: postgres
+                ports:
+                    - 5432:5432
+                options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+        steps:
+            - uses: actions/checkout@v5
+            - name: Set up Python ${{ matrix.python }}
+              uses: actions/setup-python@v6
+              with:
+                  python-version: ${{ matrix.python }}
+            - name: Install uv
+              uses: astral-sh/setup-uv@v6
+              with:
+                  version: "0.8.22"
+                  python-version: ${{ matrix.python }}
+            - name: Install test dependencies
+              run: uv sync --locked --group test
+            - name: Test
+              run: tox -f integration-pgvector
+              env:
+                  DATABASE_URL: postgres://postgres:postgres@localhost:5432/django_ai_core
+                  DB: postgres
