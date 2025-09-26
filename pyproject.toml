@@ -11,7 +11,6 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "dj-database-url>=3.0.0",
     "django>=5.2.3",
     "django-stubs>=5.2.5",
     "mkdocs>=1.6.1",
@@ -24,11 +23,14 @@ test = [
     "psycopg[binary]>=3.2.10",
     "pgvector>=0.4.1",
     "pytest-django>=4.11.1",
+    "coverage>=7.10.7",
+    "pytest>=8.4.1",
+    "dj-database-url>=3.0.1",
+    "pytest-cov>=7.0.0",
 ]
 
 [tool.pytest.ini_options]
-DJANGO_SETTINGS_MODULE = "testapp.settings"
-pythonpath = ["./", "./tests"]
+pythonpath = ["./src"]
 log_level = "INFO"
 filterwarnings = [
     "ignore::DeprecationWarning",
@@ -45,3 +47,20 @@ markers = [
     "unit: marks tests as unit tests",
     "asyncio: marks tests as async"
 ]
+
+[tool.coverage.run]
+branch = true
+source = ["src/django_ai_core"]
+omit = ["*/migrations/*", "*/tests/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    'pragma: no cover',
+    'def __repr__',
+    'if self\.debug',
+    'raise AssertionError',
+    'raise NotImplementedError',
+    'if 0:',
+    'if __name__ == .__main__.:'
+]
+ignore_errors = true

@@ -12,5 +12,6 @@ site/
 # Virtual environments
 .venv
 
-# Test DB
+# Tests
 *.db
+.coverage

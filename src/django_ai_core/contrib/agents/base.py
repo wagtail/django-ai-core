@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
 from django.core.validators import validate_slug
@@ -11,16 +12,16 @@ class AgentParameter:
     description: str
 
 
-class Agent:
+class Agent(ABC):
     """Base class for agents."""
 
     slug: str
     description: str
     parameters: list[AgentParameter]
 
+    @abstractmethod
     def execute(self, *args, **kwargs) -> str:
-        """Execute the agent."""
-        return ""
+        """Execute the agent"""
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
