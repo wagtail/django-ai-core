@@ -20,8 +20,6 @@ from .source import (
 )
 from .storage import (
     StorageProvider,
-    InMemoryProvider,
-    LlamaIndexProvider,
 )
 
 
@@ -29,8 +27,6 @@ __all__ = [
     "ChunkTransformer",
     "ModelSource",
     "IndexRegistry",
-    "InMemoryProvider",
-    "LlamaIndexProvider",
     "ParagraphChunkTransformer",
     "SentenceChunkTransformer",
     "SimpleChunkTransformer",

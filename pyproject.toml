@@ -29,8 +29,12 @@ test = [
     "pytest-cov>=7.0.0",
 ]
 
+[tool.uv]
+default-groups = ["dev", "test"]
+
 [tool.pytest.ini_options]
-pythonpath = ["./src"]
+DJANGO_SETTINGS_MODULE = "testapp.settings"
+pythonpath = ["./src", "./tests"]
 log_level = "INFO"
 filterwarnings = [
     "ignore::DeprecationWarning",

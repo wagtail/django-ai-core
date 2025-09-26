@@ -26,7 +26,7 @@ The Index Module provides a vector indexing system for Django applications. It e
         CoreEmbeddingTransformer,
     )
     from django_ai_core.contrib.index.source import ModelSource
-    from django_ai_core.contrib.index.storage import PgVectorProvider
+    from django_ai_core.contrib.index.storage.pgvector import PgVectorProvider
 
     from .models import MyModel
 

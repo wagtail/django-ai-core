@@ -163,3 +163,9 @@ LOGGING = {
         },
     },
 }
+
+
+AI_CORE_TESTAPP_STORAGE_PROVIDER = os.environ.get(
+    "AI_CORE_TESTAPP_STORAGE_PROVIDER", None
+)
+AI_CORE_TESTAPP_LLM_PROVIDER = os.environ.get("AI_CORE_TESTAPP_LLM_PROVIDER", None)
