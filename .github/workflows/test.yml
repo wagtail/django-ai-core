@@ -94,7 +94,7 @@ jobs:
 
         services:
             postgres:
-                image: pgvector:17-trixie
+                image: pgvector/pgvector:pg17-trixie
                 env:
                     POSTGRES_PASSWORD: postgres
                 ports:
