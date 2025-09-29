@@ -25,9 +25,8 @@ def test_llm_service_completion_wraps_anyllm(mock_any_llm):
     ]
     service = LLMService(client=mock_any_llm, model="mock-model")
     service.completion(messages)
-    print(mock_any_llm.completion.call_args_list)
     mock_any_llm.completion.assert_called_once_with(
-        model_id="mock-model", messages=messages
+        model="mock-model", messages=messages
     )
 
 
@@ -36,7 +35,7 @@ def test_llm_service_responses_wraps_anyllm(mock_any_llm):
     service = LLMService(client=mock_any_llm, model="mock-model")
     service.responses(prompt)
     mock_any_llm.responses.assert_called_once_with(
-        model_id="mock-model", input_data=prompt
+        model="mock-model", input_data=prompt
     )
 
 
@@ -44,6 +43,4 @@ def test_llm_service_embedding_wraps_anyllm(mock_any_llm):
     prompt = "What is the airspeed velocity of an unladen swallow?"
     service = LLMService(client=mock_any_llm, model="mock-model")
     service.embedding(prompt)
-    mock_any_llm._embedding.assert_called_once_with(
-        model_id="mock-model", inputs=prompt
-    )
+    mock_any_llm._embedding.assert_called_once_with(model="mock-model", inputs=prompt)
