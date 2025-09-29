@@ -47,10 +47,7 @@ jobs:
             - name: Install test dependencies
               run: uv sync --locked --group test
             - name: Test
-              run: uv run tox
-              env:
-                  DATABASE_URL: postgres://postgres:postgres@localhost:5432/django_ai_core
-                  DB: postgres
+              run: uv run tox -f sqlite
 
     test-postgres:
         runs-on: ubuntu-latest
@@ -81,7 +78,7 @@ jobs:
             - name: Install test dependencies
               run: uv sync --locked --group test
             - name: Test
-              run: uv run tox
+              run: uv run tox -f postgres
               env:
                   DATABASE_URL: postgres://postgres:postgres@localhost:5432/django_ai_core
                   DB: postgres
