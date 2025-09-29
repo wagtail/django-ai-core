@@ -115,4 +115,3 @@ jobs:
               run: uv run tox -f pgvector
               env:
                   DATABASE_URL: postgres://postgres:postgres@localhost:5432/django_ai_core
-                  DB: postgres
