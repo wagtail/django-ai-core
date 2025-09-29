@@ -15,13 +15,13 @@ from .models import Book, Film, VideoGame
 
 
 class MockAnyLLM(AnyLLM):
-    def completion(self, *, model_id, messages):
+    def completion(self, *, model, messages):
         return "completion"
 
-    def responses(self, *, model_id, input_data):
+    def responses(self, *, model, input_data):
         return "responses"
 
-    def _embedding(self, *, model_id, inputs):
+    def _embedding(self, *, model, inputs):
         return [0, 1, 2]
 
 

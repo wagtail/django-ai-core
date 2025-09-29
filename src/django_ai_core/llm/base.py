@@ -21,12 +21,10 @@ class LLMService:
         return f"{self.__class__.__name__}:{self.client.PROVIDER_NAME}:{self.model}"
 
     def completion(self, messages, **kwargs):
-        return self.client.completion(model_id=self.model, messages=messages, **kwargs)
+        return self.client.completion(model=self.model, messages=messages, **kwargs)
 
     def responses(self, input_data, **kwargs):
-        return self.client.responses(
-            model_id=self.model, input_data=input_data, **kwargs
-        )
+        return self.client.responses(model=self.model, input_data=input_data, **kwargs)
 
     def embedding(self, inputs, **kwargs):
-        return self.client._embedding(model_id=self.model, inputs=inputs, **kwargs)
+        return self.client._embedding(model=self.model, inputs=inputs, **kwargs)
