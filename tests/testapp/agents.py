@@ -1,17 +1,20 @@
-from django_ai_core.contrib.agents import Agent, AgentParameter, registry
+from django_ai_core.contrib.agents import Agent, registry
+from typing import Annotated
 
 
 @registry.register()
 class BasicAgent(Agent):
-    name = "basic"
+    slug = "basic"
     description = "Basic agent that just takes a prompt and returns a response."
-    parameters = [
-        AgentParameter(
-            name="prompt",
-            type=str,
-            description="The prompt to use for the agent",
-        ),
-    ]
 
-    def execute(self, *, prompt: str):
+    def execute(self, *, prompt: Annotated[str, "The prompt to use for the agent"]):
         return prompt
+
+
+@registry.register()
+class StubAgent(Agent):
+    slug = "stub"
+    description = "Basic agent that just takes a prompt and returns a response."
+
+    def execute(self):
+        return ""

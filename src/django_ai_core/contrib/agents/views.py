@@ -1,4 +1,4 @@
-from typing import Any, Type
+from typing import Any
 import json
 
 from django.http import JsonResponse
@@ -9,9 +9,37 @@ from django.utils.decorators import method_decorator
 from . import registry, Agent
 
 
+class AgentExecutionException(Exception):
+    pass
+
+
+class AgentNotFound(AgentExecutionException):
+    code = "agent_not_found"
+
+
 @method_decorator(csrf_exempt, name="dispatch")
 class AgentExecutionView(View):
     agent_slug: str = ""
+
+    def get(self, request):
+        try:
+            agent = self._get_agent()
+        except AgentNotFound as e:
+            return JsonResponse(
+                {
+                    "error": f"Agent not found: {self.agent_slug}",
+                    "code": e.code,
+                },
+                status=404,
+            )
+
+        return JsonResponse(
+            {
+                "slug": agent.slug,
+                "description": agent.description,
+                "parameters": [param.as_dict() for param in agent.parameters or []],
+            }
+        )
 
     def post(self, request):
         """
@@ -35,12 +63,12 @@ class AgentExecutionView(View):
             )
 
         try:
-            agent = registry.get(self.agent_slug)
-        except KeyError:
+            agent = self._get_agent()
+        except AgentNotFound as e:
             return JsonResponse(
                 {
                     "error": f"Agent not found: {self.agent_slug}",
-                    "code": "agent_not_found",
+                    "code": e.code,
                 },
                 status=404,
             )
@@ -49,7 +77,11 @@ class AgentExecutionView(View):
 
         return JsonResponse({"status": "completed", "data": result})
 
-    def _execute_agent(self, agent_cls: Type[Agent], arguments: dict[str, Any]) -> Any:
-        agent = agent_cls()
+    def _get_agent(self) -> Agent:
+        try:
+            return registry.get(self.agent_slug)()
+        except KeyError:
+            raise AgentNotFound
 
+    def _execute_agent(self, agent: Agent, arguments: dict[str, Any]) -> Any:
         return agent.execute(**arguments)

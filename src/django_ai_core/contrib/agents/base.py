@@ -1,5 +1,7 @@
+import inspect
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from typing import get_args, get_origin, Annotated
 
 from django.core.validators import validate_slug
 from django.core.exceptions import ValidationError
@@ -11,13 +13,39 @@ class AgentParameter:
     type: type
     description: str
 
+    def as_dict(self):
+        return {
+            "name": self.name,
+            "type": self.type.__name__,
+            "description": self.description,
+        }
+
 
 class Agent(ABC):
     """Base class for agents."""
 
     slug: str
     description: str
-    parameters: list[AgentParameter]
+    parameters: list[AgentParameter] | None
+
+    @classmethod
+    def _derive_parameters_from_signature(cls) -> list[AgentParameter]:
+        """Derive parameters from `execute` type signature"""
+        parameters = []
+        annotations = inspect.get_annotations(cls.execute)
+        for name, annotation in annotations.items():
+            if name == "return":
+                continue
+            description: str = ""
+            base_type = annotation
+            if get_origin(annotation) is Annotated:
+                base_type, *metadata = get_args(annotation)
+                if metadata and isinstance(metadata[0], str):
+                    description = metadata[0]
+            parameters.append(
+                AgentParameter(name=name, type=base_type, description=description)
+            )
+        return parameters
 
     @abstractmethod
     def execute(self, *args, **kwargs) -> str:
@@ -25,6 +53,9 @@ class Agent(ABC):
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
+
+        if "parameters" not in cls.__dict__:
+            cls.parameters = cls._derive_parameters_from_signature()
 
         if hasattr(cls, "slug"):
             try:
@@ -39,11 +70,11 @@ class AgentRegistry:
     def __init__(self):
         self._agents: dict[str, type[Agent]] = {}
 
-    def register(self, slug: str | None = None):
+    def register(self):
         """Decorator to register an agent."""
 
         def decorator(cls: type[Agent]) -> type[Agent]:
-            agent_slug = slug or getattr(cls, "slug", cls.__name__.lower())
+            agent_slug = getattr(cls, "slug")
             self._agents[agent_slug] = cls
             return cls
 

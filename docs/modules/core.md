@@ -18,19 +18,19 @@ It uses the [`any-llm`](https://mozilla-ai.github.io/any-llm/) package to provid
 
 To use the `LLMService`:
 
-````python
+```python
 
 from django_ai_core.llm import LLMService
 
 service = LLMService.create(
     provider="openai",
     model="gpt-4o"
-)```
+)
+```
 
 You can also alternatively instantiate `LLMService` with your own client instance:
 
-````
-
+```python
 from any_llm import AnyLLM
 
 client = AnyLLM.create(
@@ -39,14 +39,22 @@ model="gpt-4o"
 )
 
 service = LLMService(client=client)
-
 ```
 
 # Completions
-response = service.completion("What is the airspeed velocity of an unladen swallow?")
+
+```python
+response = service.completion(
+    "What is the airspeed velocity of an unladen swallow?"
+)
+```
 
 # Embeddings
-response = service.embedding("What's the speed on that bird when it's not hauling stuff?")
+
+```python
+response = service.embedding(
+    "What's the speed on that bird when it's not hauling stuff?"
+)
 ```
 
 All keyword arguments are passed to the underlying `any-llm` [`completion`](https://mozilla-ai.github.io/any-llm/api/completion/) and [`embedding`](https://mozilla-ai.github.io/any-llm/api/embedding/) APIs.
