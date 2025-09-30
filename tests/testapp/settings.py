@@ -84,9 +84,7 @@ PASSWORD_HASHERS = ("django.contrib.auth.hashers.MD5PasswordHasher",)
 # https://docs.djangoproject.com/en/stable/ref/settings/#databases
 
 DATABASES = {
-    "default": dj_database_url.config(
-        default="postgres://postgres:postgres@127.0.0.1:5432/postgres"
-    ),
+    "default": dj_database_url.config(default="sqlite:///test.db"),
 }
 
 
