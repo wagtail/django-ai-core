@@ -1,7 +1,6 @@
 from django.urls import path
 
 from . import registry
-from .views import AgentExecutionView
 
 
 def agent_urls() -> list:
@@ -22,12 +21,12 @@ def agent_urls() -> list:
     """
     urlpatterns = []
 
-    for agent_slug in registry.list().keys():
+    for agent in registry.list().values():
         urlpatterns.append(
             path(
-                f"{agent_slug}/",
-                AgentExecutionView.as_view(agent_slug=agent_slug),
-                name=f"agent_{agent_slug}",
+                f"{agent.slug}/",
+                agent.as_view(),
+                name=f"agent_{agent.slug}",
             )
         )
 

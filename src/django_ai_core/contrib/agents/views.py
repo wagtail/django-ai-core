@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, TYPE_CHECKING
 import json
 
 from django.http import JsonResponse
@@ -6,8 +6,10 @@ from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 
-from . import registry, Agent
 from .permissions import AllowAny
+
+if TYPE_CHECKING:
+    from . import Agent
 
 
 class AgentExecutionException(Exception):
@@ -90,11 +92,13 @@ class AgentExecutionView(View):
 
         return JsonResponse({"status": "completed", "data": result})
 
-    def _get_agent(self) -> Agent:
+    def _get_agent(self) -> "Agent":
+        from . import registry
+
         try:
             return registry.get(self.agent_slug)()
         except KeyError:
             raise AgentNotFound
 
-    def _execute_agent(self, agent: Agent, arguments: dict[str, Any]) -> Any:
+    def _execute_agent(self, agent: "Agent", arguments: dict[str, Any]) -> Any:
         return agent.execute(**arguments)

@@ -57,7 +57,7 @@ class MyAppAppConfig(AppConfig):
 
 ## Configuring Agent URLs
 
-To make your agents accessible at automatically generated URLs, add `agent_urls()` to your `urlpatterns`:
+Agents can be made accessible at automatically generated URLs by adding `agent_urls()` to your `urlpatterns`:
 
 ```python
 from django.urls import path, include
@@ -71,6 +71,18 @@ urlpatterns = [
 
 This will generate URLs under `ai/` for all your registered agents based on their `slug` values. The `SimplePromptAgent` from the above example will be accessible at `ai/prompt/`.
 
+Alternatively, you can register views for individual agents using the `as_view` classmethod on Agent classes:
+
+````python
+
+from django.urls import path, include
+from .agents import SimplePromptAgent
+
+urlpatterns = [
+    ...
+    path("ai/simple/", SimplePromptAgent.as_view()),
+]
+
 ## Using Agents
 
 Agents can either be invoked directly:
@@ -79,7 +91,7 @@ Agents can either be invoked directly:
 from .agents import SimplePromptAgent
 
 SimplePromptAgent().execute(prompt="Foo")
-```
+````
 
 or via their URL:
 
@@ -91,4 +103,26 @@ POST https://www.example.com/ai/prompt/
         "prompt": "Are you suggesting coconuts migrate?"
     }
 }
+```
+
+## Permissions
+
+You can control who can execute your agents using permission. See the [Permissions](./permissions) documentation for detailed information on how to secure your agents.
+
+Quick example:
+
+```python
+
+from django_ai_core.contrib.agents import Agent
+from django_ai_core.contrib.agents.permissions import IsAuthenticated
+
+@registry.register()
+class SecureAgent(Agent):
+    slug = "secure"
+    description = "Agent requiring authentication"
+    permission = IsAuthenticated()
+    parameters = []
+
+    def execute(self):
+        return "Authenticated access only!"
 ```

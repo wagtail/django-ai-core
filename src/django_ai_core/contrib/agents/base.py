@@ -7,6 +7,7 @@ from django.core.validators import validate_slug
 from django.core.exceptions import ValidationError
 
 from .permissions import BasePermission
+from .views import AgentExecutionView
 
 
 @dataclass
@@ -30,6 +31,10 @@ class Agent(ABC):
     slug: str
     description: str
     parameters: list[AgentParameter] | None
+
+    @classmethod
+    def as_view(cls):
+        return AgentExecutionView.as_view(agent_slug=cls.slug)
 
     @classmethod
     def _derive_parameters_from_signature(cls) -> list[AgentParameter]:
