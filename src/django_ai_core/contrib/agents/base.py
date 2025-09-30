@@ -56,7 +56,7 @@ class Agent(ABC):
         return parameters
 
     @abstractmethod
-    def execute(self, *args, **kwargs) -> str:
+    def execute(self, *args, **kwargs) -> str | dict | list:
         """Execute the agent"""
 
     def __init_subclass__(cls, **kwargs):
