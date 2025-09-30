@@ -7,6 +7,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 
 from . import registry, Agent
+from .permissions import AllowAny
 
 
 class AgentExecutionException(Exception):
@@ -71,6 +72,18 @@ class AgentExecutionView(View):
                     "code": e.code,
                 },
                 status=404,
+            )
+
+        permission = getattr(agent, "permission", None) or AllowAny()
+        if not permission.has_permission(request, self.agent_slug):
+            return JsonResponse(
+                {
+                    "error": permission.get_permission_denied_message(
+                        request, self.agent_slug
+                    ),
+                    "code": "permission_denied",
+                },
+                status=403,
             )
 
         result = self._execute_agent(agent, data["arguments"])

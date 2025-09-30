@@ -10,7 +10,6 @@ Django AI Core provides core functionality for interacting with LLMs in your Dja
     -   Logging for LLM requests
     -   Async/streaming support
 -   Agents:
-    -   Auth wrappers
     -   Rate limiting
     -   Streaming responses
 -   Index:

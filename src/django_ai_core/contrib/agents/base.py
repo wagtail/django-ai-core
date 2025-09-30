@@ -6,12 +6,15 @@ from typing import get_args, get_origin, Annotated
 from django.core.validators import validate_slug
 from django.core.exceptions import ValidationError
 
+from .permissions import BasePermission
+
 
 @dataclass
 class AgentParameter:
     name: str
     type: type
     description: str
+    permission = BasePermission | None
 
     def as_dict(self):
         return {
