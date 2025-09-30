@@ -175,8 +175,8 @@ class ModelSource(ObjectSource):
     def provides_document(self, document: Document) -> bool:
         return document.document_key.split(":")[0] == self.source_id
 
-    def get_document_key(self, obj) -> str:
-        return f"{self.source_id}:{obj.pk}"
+    def get_document_key(self, obj, chunk) -> str:
+        return f"{self.source_id}:{obj.pk}:{chunk}"
 
     def _object_to_documents(self, obj: models.Model) -> Iterable[Document]:
         if not self.provides_object(obj):
@@ -185,9 +185,9 @@ class ModelSource(ObjectSource):
         metadata = self.get_metadata(obj)
         content = self.get_content(obj)
 
-        for document in self.chunk_transformer.transform(content):
+        for chunk, document in enumerate(self.chunk_transformer.transform(content)):
             yield Document(
-                document_key=self.get_document_key(obj),
+                document_key=self.get_document_key(obj, chunk),
                 content=document,
                 metadata=metadata,
             )
