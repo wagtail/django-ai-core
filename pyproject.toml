@@ -3,10 +3,29 @@ name = "django-ai-core"
 version = "0.1.0"
 description = "Django AI Core provides developer-focused AI features for implementing AI tooling in to Django sites."
 readme = "README.md"
+license = "BSD-3-Clause"
+license-files = ["LICENSE"]
+authors = [
+  { name = "Wagtail core team + contributors", email = "hello@wagtail.org" },
+]
 requires-python = ">=3.11"
 dependencies = [
     "any-llm-sdk==0.20.3",
     "queryish>=0.2.0",
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Web Environment",
+  "Intended Audience :: Developers",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Framework :: Django",
+  "Framework :: Django :: 5.2",
+  "Framework :: Django :: 6.0",
 ]
 
 [dependency-groups]
@@ -30,6 +49,10 @@ test = [
     "tox-gh-actions>=3.3.0",
     "tox-uv>=1.28.0",
 ]
+
+[build-system]
+requires = ["uv_build>=0.8.22,<0.9.0"]
+build-backend = "uv_build"
 
 [tool.uv]
 default-groups = ["dev", "test"]
