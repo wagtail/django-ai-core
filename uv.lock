@@ -321,7 +321,7 @@ wheels = [
 [[package]]
 name = "django-ai-core"
 version = "0.1.0"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "any-llm-sdk" },
     { name = "queryish" },
