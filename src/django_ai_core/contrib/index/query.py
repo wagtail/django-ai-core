@@ -2,12 +2,11 @@
 Query interface for vector indexes.
 """
 
-from typing import TypeVar
-from collections import defaultdict
 import logging
+from collections import defaultdict
+from typing import TypeVar
 
-
-from .source import Source, ObjectSource
+from .source import ObjectSource, Source
 
 logger = logging.getLogger(__name__)
 ObjectType = TypeVar("ObjectType")
@@ -93,10 +92,9 @@ class QueryHandler:
         """
         # Try to find an appropriate source
         for source in self.sources:
-            if isinstance(source, ObjectSource):
-                if source.provides_object(obj):
-                    source_to_use = source
-                    break
+            if isinstance(source, ObjectSource) and source.provides_object(obj):
+                source_to_use = source
+                break
 
         if not source_to_use:
             raise ValueError(

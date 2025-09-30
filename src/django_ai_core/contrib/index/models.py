@@ -1,8 +1,9 @@
 import hashlib
 from typing import TYPE_CHECKING
-from django.db import models
+
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from django.db import models
 
 from .base import registry
 
@@ -79,7 +80,6 @@ class EmbeddingCache(models.Model):
                 content_hash=content_hash,
                 embedding_transformer_id=embedding_transformer_id,
             )
-            return cache_entry, False
         except cls.DoesNotExist:
             # Create new cache entry
             cache_entry = cls.objects.create(
@@ -90,6 +90,8 @@ class EmbeddingCache(models.Model):
                 embedding_dimensions=len(embedding_vector),
             )
             return cache_entry, True
+        else:
+            return cache_entry, False
 
     @classmethod
     def get_cached_embedding(
@@ -105,9 +107,10 @@ class EmbeddingCache(models.Model):
                 content_hash=content_hash,
                 embedding_transformer_id=embedding_transformer_id,
             )
-            return cache_entry.embedding_vector
         except cls.DoesNotExist:
             return None
+        else:
+            return cache_entry.embedding_vector
 
 
 class DocumentEmbedding(models.Model):
@@ -163,6 +166,9 @@ class ModelSourceIndex(models.Model):
         unique_together = [
             ("content_type", "object_id", "index_name", "source_id"),
         ]
+
+    def __str__(self):
+        return f"Model Source Index: {self.object_id} in {self.index_name}"
 
     @classmethod
     def register(cls, obj, index_name, source_id):

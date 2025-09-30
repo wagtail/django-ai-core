@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
 from typing import Iterable
-from .schema import EmbeddedDocument, Document
 
 from django_ai_core.llm import LLMService
+
+from .schema import Document, EmbeddedDocument
 
 
 class EmbeddingTransformer(ABC):
@@ -13,6 +14,7 @@ class EmbeddingTransformer(ABC):
         """Get unique identifier for this transformer."""
         return self.__class__.__name__
 
+    @abstractmethod
     def embed_string(self, text: str) -> list[float] | None:
         """Embed a string using the transformer."""
         pass
@@ -68,7 +70,7 @@ class CoreEmbeddingTransformer(EmbeddingTransformer):
             texts = [document.content for document in batch]
             embeddings = self.llm_service.embedding(texts).data
 
-            for document, embedding in zip(batch, embeddings):
+            for document, embedding in zip(batch, embeddings, strict=False):
                 embedded_documents.append(document.add_embedding(embedding.embedding))
 
         return embedded_documents

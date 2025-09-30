@@ -1,7 +1,7 @@
 import json
-import pytest
 
-from django.contrib.auth.models import User, Permission, AnonymousUser
+import pytest
+from django.contrib.auth.models import AnonymousUser, Permission, User
 from django.contrib.contenttypes.models import ContentType
 from django.test import RequestFactory
 
@@ -11,11 +11,10 @@ from django_ai_core.contrib.agents import (
     registry,
 )
 from django_ai_core.contrib.agents.permissions import (
-    IsAuthenticated,
-    DjangoPermission,
     CompositePermission,
+    DjangoPermission,
+    IsAuthenticated,
 )
-
 from django_ai_core.contrib.agents.views import AgentExecutionView
 
 

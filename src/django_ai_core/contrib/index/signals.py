@@ -1,4 +1,4 @@
-from django.db.models.signals import post_save, post_delete
+from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 
 from .models import ModelSourceIndex
@@ -14,10 +14,9 @@ def handle_model_save(sender, instance, **kwargs):
 
     for index in registered_indexes:
         for source in index.sources:
-            if isinstance(source, ObjectSource):
-                if source.provides_object(sender):
-                    documents = source.objects_to_documents(sender)
-                    index.update(documents)
+            if isinstance(source, ObjectSource) and source.provides_object(sender):
+                documents = source.objects_to_documents(sender)
+                index.update(documents)
 
 
 @receiver(post_delete)

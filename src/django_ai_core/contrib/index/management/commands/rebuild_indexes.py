@@ -4,10 +4,11 @@ Django management command to rebuild VectorIndexes.
 This command rebuilds all registered VectorIndex instances.
 """
 
-from django.core.management.base import BaseCommand, CommandError
-from django.utils import timezone
 import logging
 import time
+
+from django.core.management.base import BaseCommand, CommandError
+from django.utils import timezone
 
 from django_ai_core.contrib.index.base import registry
 
@@ -108,8 +109,6 @@ class Command(BaseCommand):
             try:
                 start_time = time.time()
                 index_cls = registry.get(index_name)
-                if not index_cls:
-                    raise ValueError(f"Index '{index_name}' not found in registry")
 
                 self.stdout.write(
                     f"\n[{i}/{len(indexes_to_rebuild)}] Rebuilding index: {index_name}"

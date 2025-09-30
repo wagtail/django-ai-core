@@ -1,5 +1,6 @@
-from django_ai_core.contrib.agents import Agent, registry
 from typing import Annotated
+
+from django_ai_core.contrib.agents import Agent, registry
 
 
 @registry.register()

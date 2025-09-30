@@ -1,13 +1,13 @@
 from .base import (
-    VectorIndex,
     IndexRegistry,
+    VectorIndex,
     registry,
 )
 from .chunking import (
     ChunkTransformer,
-    SimpleChunkTransformer,
-    SentenceChunkTransformer,
     ParagraphChunkTransformer,
+    SentenceChunkTransformer,
+    SimpleChunkTransformer,
 )
 from .embedding import (
     CoreEmbeddingTransformer,
@@ -22,18 +22,17 @@ from .storage import (
     StorageProvider,
 )
 
-
 __all__ = [
+    "CachedEmbeddingTransformer",
     "ChunkTransformer",
-    "ModelSource",
+    "CoreEmbeddingTransformer",
     "IndexRegistry",
+    "ModelSource",
+    "ModelSource",
     "ParagraphChunkTransformer",
     "SentenceChunkTransformer",
     "SimpleChunkTransformer",
-    "CoreEmbeddingTransformer",
-    "CachedEmbeddingTransformer",
     "StorageProvider",
     "VectorIndex",
-    "ModelSource",
     "registry",
 ]

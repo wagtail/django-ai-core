@@ -1,7 +1,7 @@
-from .base import StorageProvider, BaseStorageQuerySet, BaseStorageDocument
-from ..schema import EmbeddedDocument
-
 import boto3
+
+from ..schema import EmbeddedDocument
+from .base import BaseStorageDocument, BaseStorageQuerySet, StorageProvider
 
 # Key used for storing original content in non-filterable metadata
 CONTENT_METADATA_KEY = "dj_ai_core_content"
@@ -47,8 +47,8 @@ class S3VectorQuerySet(BaseStorageQuerySet["S3VectorProvider"]):
             returnDistance=True,
         )
 
-        for response in response["vectors"]:
-            yield self.get_instance(response)
+        for vector in response["vectors"]:
+            yield self.get_instance(vector)
 
 
 class S3VectorProvider(StorageProvider):

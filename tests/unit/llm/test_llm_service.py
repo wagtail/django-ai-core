@@ -1,8 +1,9 @@
-import pytest
 from unittest import mock
-from django_ai_core.llm import LLMService
 
+import pytest
 from any_llm import AnyLLM
+
+from django_ai_core.llm import LLMService
 
 
 class MockAnyLLM(mock.Mock):

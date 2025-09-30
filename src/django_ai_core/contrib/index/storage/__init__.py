@@ -1,6 +1,6 @@
-from .base import StorageProvider, BaseStorageQuerySet
+from .base import BaseStorageQuerySet, StorageProvider
 
 __all__ = [
-    "StorageProvider",
     "BaseStorageQuerySet",
+    "StorageProvider",
 ]

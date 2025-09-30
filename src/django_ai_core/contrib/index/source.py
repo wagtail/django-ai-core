@@ -1,10 +1,10 @@
-from typing import TypeVar, TYPE_CHECKING, Iterable, Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Iterable, Protocol, TypeVar, runtime_checkable
+
 from django.db import models
 from django.db.models import QuerySet
 
-from .schema import Document
 from .chunking import ChunkTransformer, SimpleChunkTransformer
-
+from .schema import Document
 
 if TYPE_CHECKING:
     from .base import VectorIndex
@@ -101,7 +101,7 @@ class ModelSource(ObjectSource):
 
             # Include concrete fields and forward relations (like ForeignKey)
             if field.concrete or (
-                field.is_relation and field.one_to_one or field.many_to_one
+                (field.is_relation and field.one_to_one) or field.many_to_one
             ):
                 field_names.append(field.name)
 

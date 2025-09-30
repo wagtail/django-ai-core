@@ -1,9 +1,9 @@
-from typing import Type, Generator, TYPE_CHECKING
+from typing import TYPE_CHECKING, Generator, Type
 
 from pgvector.django import CosineDistance
 
-from ..base import StorageProvider, BaseStorageQuerySet, BaseStorageDocument
 from ...schema import EmbeddedDocument
+from ..base import BaseStorageDocument, BaseStorageQuerySet, StorageProvider
 
 if TYPE_CHECKING:
     from .models import BasePgVectorEmbedding

@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
-from .base import StorageProvider, BaseStorageQuerySet, BaseStorageDocument
 from ..schema import EmbeddedDocument
+from .base import BaseStorageDocument, BaseStorageQuerySet, StorageProvider
 
 if TYPE_CHECKING:
     from llama_index.core.vector_stores.types import BasePydanticVectorStore
@@ -19,7 +19,7 @@ class LlamaIndexQuerySet(BaseStorageQuerySet["LlamaIndexProvider"]):
             return val
 
     def run_query(self):
-        from llama_index.core.vector_stores import VectorStoreQuery, MetadataFilters
+        from llama_index.core.vector_stores import MetadataFilters, VectorStoreQuery
 
         if not self.storage_provider:
             raise ValueError("Storage provider is required")

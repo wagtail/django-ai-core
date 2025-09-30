@@ -1,6 +1,6 @@
 import pytest
 
-from django_ai_core.contrib.index.base import VectorIndex, IndexRegistry
+from django_ai_core.contrib.index.base import IndexRegistry, VectorIndex
 
 
 class TestIndexOne(VectorIndex):

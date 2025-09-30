@@ -1,10 +1,10 @@
-from typing import Any, TYPE_CHECKING
 import json
+from typing import TYPE_CHECKING, Any
 
 from django.http import JsonResponse
+from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
 
 from .permissions import AllowAny
 
@@ -97,8 +97,8 @@ class AgentExecutionView(View):
 
         try:
             return registry.get(self.agent_slug)()
-        except KeyError:
-            raise AgentNotFound
+        except KeyError as e:
+            raise AgentNotFound from e
 
     def _execute_agent(self, agent: "Agent", arguments: dict[str, Any]) -> Any:
         return agent.execute(**arguments)

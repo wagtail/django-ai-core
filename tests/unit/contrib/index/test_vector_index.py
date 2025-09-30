@@ -2,10 +2,10 @@ from typing import ClassVar
 from unittest import mock
 
 from django_ai_core.contrib.index.base import VectorIndex
-from django_ai_core.contrib.index.schema import Document
-from django_ai_core.contrib.index.storage.base import StorageProvider
 from django_ai_core.contrib.index.embedding import EmbeddingTransformer
+from django_ai_core.contrib.index.schema import Document
 from django_ai_core.contrib.index.source import HasPostIndexUpdateHook
+from django_ai_core.contrib.index.storage.base import StorageProvider
 
 
 class MockStorageProvider(StorageProvider):

@@ -5,8 +5,8 @@ Provides a caching layer that sits between document transformers and embedding
 generation to avoid expensive embedding operations for duplicate content.
 """
 
-from abc import ABC, abstractmethod
 import logging
+from abc import ABC, abstractmethod
 
 from django_ai_core.contrib.index.schema import Document, EmbeddedDocument
 
@@ -61,13 +61,13 @@ class DjangoEmbeddingCacheBackend(EmbeddingCacheBackend):
         """Get the cache model."""
         try:
             from .models import EmbeddingCache
-
-            return EmbeddingCache
-        except ImportError:
+        except ImportError as e:
             raise ImportError(
                 "Django is not properly configured. Make sure Django settings are loaded "
                 "and 'django_ai_core.contrib.index' is in INSTALLED_APPS."
-            )
+            ) from e
+        else:
+            return EmbeddingCache
 
     def get_embedding(self, content: str, transformer_id: str) -> list[float] | None:
         """Get cached embedding for content and model."""
@@ -202,7 +202,7 @@ class CachedEmbeddingTransformer(EmbeddingTransformer):
             result[i] = document
 
         # Place newly embedded documents
-        for i, document in zip(uncached_indices, embedded_documents):
+        for i, document in zip(uncached_indices, embedded_documents, strict=False):
             result[i] = document
 
         return [document for document in result if document is not None]

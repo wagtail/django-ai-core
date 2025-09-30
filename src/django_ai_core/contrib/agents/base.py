@@ -1,10 +1,10 @@
 import inspect
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import get_args, get_origin, Annotated
+from typing import Annotated, get_args, get_origin
 
-from django.core.validators import validate_slug
 from django.core.exceptions import ValidationError
+from django.core.validators import validate_slug
 
 from .permissions import BasePermission
 from .views import AgentExecutionView
@@ -68,10 +68,10 @@ class Agent(ABC):
         if hasattr(cls, "slug"):
             try:
                 validate_slug(cls.slug)
-            except ValidationError:
+            except ValidationError as e:
                 raise ValueError(
                     f"Agent {cls.__name__} has an invalid slug: {cls.slug}. Use a valid “slug” consisting of letters, numbers, underscores or hyphens."
-                )
+                ) from e
 
 
 class AgentRegistry:
@@ -82,7 +82,7 @@ class AgentRegistry:
         """Decorator to register an agent."""
 
         def decorator(cls: type[Agent]) -> type[Agent]:
-            agent_slug = getattr(cls, "slug")
+            agent_slug = cls.slug
             self._agents[agent_slug] = cls
             return cls
 

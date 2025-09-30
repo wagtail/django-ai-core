@@ -1,15 +1,16 @@
-from typing import TYPE_CHECKING, Any, ClassVar, Iterable
-from django.utils.text import slugify
-from .source import HasPostIndexUpdateHook
 import logging
+from typing import TYPE_CHECKING, Any, ClassVar, Iterable
+
+from django.utils.text import slugify
+
+from .source import HasPostIndexUpdateHook
 
 if TYPE_CHECKING:
-    from .schema import Document
-    from .storage.base import StorageProvider
-    from .query import ResultQuerySetMixin
     from .embedding import EmbeddingTransformer
+    from .query import QueryHandler, ResultQuerySetMixin
+    from .schema import Document
     from .source import Source
-    from .query import QueryHandler
+    from .storage.base import StorageProvider
 
 
 logger = logging.getLogger(__name__)

@@ -1,5 +1,6 @@
-import pytest
 from typing import Annotated
+
+import pytest
 
 from django_ai_core.contrib.agents.base import Agent, AgentParameter
 
@@ -63,7 +64,7 @@ def test_agent_invalid_slug():
     """Test that agents with invalid slugs raise exceptions."""
     # We're testing the validation in Agent.__init_subclass__, which runs when the class is defined
     # So we need to dynamically create a class to trigger the validation
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(ValueError, match="invalid slug"):
         type(
             "InvalidAgent",
             (Agent,),
@@ -73,8 +74,6 @@ def test_agent_invalid_slug():
                 "parameters": [],
             },
         )
-
-    assert "invalid slug" in str(excinfo.value).lower()
 
 
 def test_agent_parameter_dataclass():

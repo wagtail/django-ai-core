@@ -1,16 +1,16 @@
-import pytest
 from unittest.mock import Mock
 
-from django.contrib.auth.models import User, Permission, AnonymousUser
+import pytest
+from django.contrib.auth.models import AnonymousUser, Permission, User
 from django.contrib.contenttypes.models import ContentType
 from django.http import HttpRequest
 
 from django_ai_core.contrib.agents.permissions import (
-    BasePermission,
     AllowAny,
-    IsAuthenticated,
-    DjangoPermission,
+    BasePermission,
     CompositePermission,
+    DjangoPermission,
+    IsAuthenticated,
 )
 
 
@@ -127,7 +127,7 @@ class TestDjangoPermission:
 
     def test_invalid_permission_format(self):
         """Test that invalid permission format raises ValueError."""
-        with pytest.raises(ValueError) as excinfo:
+        with pytest.raises(ValueError, match="must be in format") as excinfo:
             DjangoPermission("invalid_permission")
         assert "app_label.permission_codename" in str(excinfo.value)
 
@@ -190,7 +190,7 @@ class TestCompositePermission:
 
     def test_requires_at_least_one_permission(self):
         """Test that at least one permission must be provided."""
-        with pytest.raises(ValueError) as excinfo:
+        with pytest.raises(ValueError, match="At least one") as excinfo:
             CompositePermission([])
         assert "at least one permission" in str(excinfo.value).lower()
 

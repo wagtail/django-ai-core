@@ -1,15 +1,18 @@
-import requests
 from unittest.mock import Mock
-from django.conf import settings
+
+import requests
 from any_llm import AnyLLM
-from django_ai_core.llm import LLMService
-from django_ai_core.contrib.index import VectorIndex, registry
+from django.conf import settings
+
 from django_ai_core.contrib.index import (
     CachedEmbeddingTransformer,
     CoreEmbeddingTransformer,
+    VectorIndex,
+    registry,
 )
-from django_ai_core.contrib.index.source import ModelSource, Source
 from django_ai_core.contrib.index.schema import Document
+from django_ai_core.contrib.index.source import ModelSource, Source
+from django_ai_core.llm import LLMService
 
 from .models import Book, Film, VideoGame
 

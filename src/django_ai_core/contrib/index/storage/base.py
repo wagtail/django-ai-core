@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
-from typing import ClassVar, Generic, TypeVar, Iterator, Any, Iterable
+from typing import Any, ClassVar, Generic, Iterable, Iterator, TypeVar
+
+from queryish import Queryish, VirtualModel
 
 from ..schema import EmbeddedDocument
-from queryish import VirtualModel, Queryish
 
 StorageProviderType = TypeVar("StorageProviderType", bound="StorageProvider")
 

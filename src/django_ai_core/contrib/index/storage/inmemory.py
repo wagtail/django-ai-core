@@ -1,5 +1,5 @@
-from .base import StorageProvider, BaseStorageQuerySet
 from ..schema import EmbeddedDocument
+from .base import BaseStorageQuerySet, StorageProvider
 
 
 class InMemoryQuerySet(BaseStorageQuerySet["InMemoryProvider"]):

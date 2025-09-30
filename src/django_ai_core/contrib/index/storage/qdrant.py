@@ -1,9 +1,9 @@
-from .base import StorageProvider, BaseStorageQuerySet, BaseStorageDocument
-from ..schema import EmbeddedDocument
-
 from qdrant_client import QdrantClient
 from qdrant_client.http import models as qdrant_models
 from qdrant_client.models import Distance
+
+from ..schema import EmbeddedDocument
+from .base import BaseStorageDocument, BaseStorageQuerySet, StorageProvider
 
 
 class QdrantQuerySet(BaseStorageQuerySet["QdrantProvider"]):
@@ -46,8 +46,8 @@ class QdrantQuerySet(BaseStorageQuerySet["QdrantProvider"]):
             query_filter=qdrant_models.Filter(must=filters),
         )
 
-        for response in response["vectors"]:
-            yield self.get_instance(response)
+        for vector in response["vectors"]:
+            yield self.get_instance(vector)
 
 
 class QdrantProvider(StorageProvider):

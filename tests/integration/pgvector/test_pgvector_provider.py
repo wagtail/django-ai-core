@@ -3,8 +3,8 @@ import pytest
 from django_ai_core.contrib.index.schema import EmbeddedDocument
 from django_ai_core.contrib.index.storage.pgvector import PgVectorProvider
 from django_ai_core.contrib.index.storage.pgvector.models import (
-    PgVectorEmbedding,
     BasePgVectorEmbedding,
+    PgVectorEmbedding,
 )
 
 pytestmark = pytest.mark.django_db
@@ -49,10 +49,8 @@ class TestPgVectorProvider:
         """Test initialization with an invalid model raises ValueError."""
         invalid_model = type("InvalidModel", (object,), {})
 
-        with pytest.raises(ValueError) as excinfo:
+        with pytest.raises(ValueError, match="must include"):
             PgVectorProvider(model=invalid_model)
-
-        assert "must include" in str(excinfo.value)
 
     def test_add_new_document(self, pg_vector_provider):
         """Test adding a new document to storage."""
@@ -139,10 +137,8 @@ class TestPgVectorProvider:
         queryset = pg_vector_provider.objects.filter(category="book")
 
         # Execute the query - should raise ValueError
-        with pytest.raises(ValueError) as excinfo:
+        with pytest.raises(ValueError, match="embedding filter is required"):
             list(queryset)
-
-        assert "embedding filter is required" in str(excinfo.value)
 
     def test_queryset_with_ordering_raises(self, pg_vector_provider):
         """Test that using ordering raises NotImplementedError."""

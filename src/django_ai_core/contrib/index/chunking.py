@@ -52,8 +52,8 @@ class SentenceChunkTransformer(ChunkTransformer):
         self.chunk_overlap = chunk_overlap
 
     def transform(self, text: str) -> list[str]:
-        from llama_index.core.node_parser import SentenceSplitter
         from llama_index.core import Document as LlamaDocument
+        from llama_index.core.node_parser import SentenceSplitter
 
         splitter = SentenceSplitter(
             chunk_size=self.chunk_size, chunk_overlap=self.chunk_overlap
@@ -63,7 +63,7 @@ class SentenceChunkTransformer(ChunkTransformer):
         nodes = splitter.get_nodes_from_documents([llama_doc])
 
         chunks = []
-        for i, node in enumerate(nodes):
+        for _, node in enumerate(nodes):
             chunks.append(
                 node.get_content(),
             )

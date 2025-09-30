@@ -28,6 +28,10 @@ classifiers = [
   "Framework :: Django :: 6.0",
 ]
 
+[project.urls]
+Home = "https://github.com/wagtail/django-ai-core"
+
+
 [dependency-groups]
 dev = [
     "django>=5.2.3",
@@ -56,6 +60,22 @@ build-backend = "uv_build"
 
 [tool.uv]
 default-groups = ["dev", "test"]
+
+[tool.ruff.lint]
+select = [
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "C90", # mccabe
+    "DJ",  # flake8-django
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+    "I",   # isort
+    "RUF", # ruff-specific rules
+    "TRY", # tryceratops
+    "PT",  # flake8-pytest-style
+    "SIM", # flake8-simplify
+]
+ignore = ["TRY003", "E501", "RUF012"]
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "testapp.settings"
