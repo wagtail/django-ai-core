@@ -16,18 +16,6 @@ from django_ai_core.llm import LLMService
 
 from .models import Book, Film, VideoGame
 
-
-class MockAnyLLM(AnyLLM):
-    def completion(self, *, model, messages):
-        return "completion"
-
-    def responses(self, *, model, input_data):
-        return "responses"
-
-    def _embedding(self, *, model, inputs):
-        return [0, 1, 2]
-
-
 storage_provider_setting = settings.AI_CORE_TESTAPP_STORAGE_PROVIDER
 llm_provider_setting = settings.AI_CORE_TESTAPP_LLM_PROVIDER
 

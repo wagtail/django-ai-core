@@ -169,3 +169,8 @@ AI_CORE_TESTAPP_LLM_PROVIDER = os.environ.get("AI_CORE_TESTAPP_LLM_PROVIDER", No
 
 if AI_CORE_TESTAPP_STORAGE_PROVIDER == "pgvector":
     INSTALLED_APPS += ["django_ai_core.contrib.index.storage.pgvector"]
+    DATABASES = {
+        "default": dj_database_url.parse(
+            "postgres://postgres:postgres@127.0.0.1:5432/postgres"
+        ),
+    }

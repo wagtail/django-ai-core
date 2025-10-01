@@ -149,15 +149,28 @@ def test_vector_index_post_update_hook():
     assert index.sources[0].post_update_called
 
 
-def test_vector_index_search():
-    """Test search delegates to query_handler."""
+def test_vector_index_search_documents():
+    """Test search_documents delegates to query_handler."""
     index = create_test_vector_index_cls()()
 
-    index.query_handler.search = mock.MagicMock()
+    index.query_handler.search_documents = mock.MagicMock()
 
-    index.search("test query")
+    index.search_documents("test query")
 
-    index.query_handler.search.assert_called_once_with("test query")
+    index.query_handler.search_documents.assert_called_once_with("test query")
+
+
+def test_vector_index_search_sources():
+    """Test search_sources delegates to query_handler."""
+    index = create_test_vector_index_cls()()
+
+    index.query_handler.search_sources = mock.MagicMock()
+
+    index.search_sources("test query")
+
+    index.query_handler.search_sources.assert_called_once_with(
+        "test query", overfetch_multiplier=None, max_overfetch_iterations=None
+    )
 
 
 def test_vector_index_find_similar():

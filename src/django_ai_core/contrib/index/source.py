@@ -211,7 +211,8 @@ class ModelSource(ObjectSource):
     def objects_from_documents(
         self, documents: Iterable[Document]
     ) -> Iterable[models.Model]:
-        """Convert documents back to Django model instances if they were created by this source."""
+        """Convert documents back to Django model instances if they were created by this source.
+        Returns objects in same order as provided Documents."""
 
         pks = []
         for document in documents:
@@ -221,16 +222,12 @@ class ModelSource(ObjectSource):
         if not pks:
             return []
 
-        # Deduplicate pks
+        # Deduplicate pks for more efficient lookup
         pks = list(set(pks))
 
-        # Bulk fetch all objects in a single query
         objects = list(self.model.objects.filter(pk__in=pks))
-
-        # Create a mapping for quick lookup
         pk_to_object = {obj.pk: obj for obj in objects}
 
-        # Return objects in the same order as documents, skipping missing ones
         for document in documents:
             if self.provides_document(document):
                 pk = document.metadata["pk"]

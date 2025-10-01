@@ -7,10 +7,10 @@ from .source import HasPostIndexUpdateHook
 
 if TYPE_CHECKING:
     from .embedding import EmbeddingTransformer
-    from .query import QueryHandler, ResultQuerySetMixin
+    from .query import QueryHandler
     from .schema import Document
     from .source import Source
-    from .storage.base import StorageProvider
+    from .storage.base import BaseStorageQuerySet, StorageProvider
 
 
 logger = logging.getLogger(__name__)
@@ -85,16 +85,37 @@ class VectorIndex:
             if isinstance(source, HasPostIndexUpdateHook):
                 source.post_index_update(self)
 
-    def search(self, query: str) -> "ResultQuerySetMixin":
-        """Search the index and return a queryish object of results.
+    def search_sources(
+        self,
+        query: str,
+        *,
+        overfetch_multiplier: int | None = None,
+        max_overfetch_iterations: int | None = None,
+    ) -> "BaseStorageQuerySet":
+        """Search the index and return a queryish object of results
+        mapped back to original source objects.
         Args:
             query: The search query string
         Returns:
             ResultQuerySet instance for the search results
         """
-        return self.query_handler.search(query)
+        return self.query_handler.search_sources(
+            query,
+            overfetch_multiplier=overfetch_multiplier,
+            max_overfetch_iterations=max_overfetch_iterations,
+        )
 
-    def find_similar(self, obj: object) -> "ResultQuerySetMixin":
+    def search_documents(self, query: str) -> "BaseStorageQuerySet":
+        """Search the index and return a queryish object of Documents
+        as stored in the underlying index.
+        Args:
+            query: The search query string
+        Returns:
+            ResultQuerySet instance for the search results
+        """
+        return self.query_handler.search_documents(query)
+
+    def find_similar(self, obj: object) -> "BaseStorageQuerySet":
         """Find objects similar to the given object.
         Args:
             obj: The object to find similar objects to
