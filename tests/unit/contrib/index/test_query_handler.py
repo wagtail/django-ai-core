@@ -312,7 +312,7 @@ class TestSourceResultMixin:
 
         qs = self.make_qs(documents, overfetch_multiplier=1, max_overfetch_iterations=2)
         qs = qs[0:10]
-        qs._fetch_batch = mock.Mock(return_value=[documents[0]])
+        qs._fetch_batch = mock.Mock(return_value=documents)
 
         list(qs.run_query())
 
