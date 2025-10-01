@@ -36,10 +36,15 @@ class S3VectorQuerySet(BaseStorageQuerySet["S3VectorProvider"]):
         if self.ordering:
             raise NotImplementedError("Ordering is not supported for querying")
 
+        if self.offset:
+            raise NotImplementedError(
+                "Offsets are not supported for the S3 Vectors provider"
+            )
+
         response = client.query_vectors(
             vectorBucketName=storage_provider.bucket_name,
             indexName=storage_provider.index_name,
-            topK=self._top_k,
+            topK=self.limit,
             queryVector={"float32": embedding},
             # Only supporting strict equality in filters for now
             filter=filter_map or None,

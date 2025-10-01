@@ -34,6 +34,11 @@ class QdrantQuerySet(BaseStorageQuerySet["QdrantProvider"]):
         if self.ordering:
             raise NotImplementedError("Ordering is not supported for querying")
 
+        if self.offset:
+            raise NotImplementedError(
+                "Offsets are not supported for the Qdrant provider"
+            )
+
         filters = [
             qdrant_models.FieldCondition(key=idx, match=val)
             for idx, val in filter_map.items()
@@ -42,7 +47,7 @@ class QdrantQuerySet(BaseStorageQuerySet["QdrantProvider"]):
         response = client.search(
             collection_name=storage_provider.index_name,
             query_vector=embedding,
-            limit=self._top_k,
+            limit=self.limit,
             query_filter=qdrant_models.Filter(must=filters),
         )
 

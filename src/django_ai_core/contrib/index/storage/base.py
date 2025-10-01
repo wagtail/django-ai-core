@@ -21,13 +21,7 @@ class BaseStorageQuerySet(Queryish, Generic[StorageProviderType]):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._top_k: int = 5
-
-    def top_k(self, k: int) -> "BaseStorageQuerySet":
-        """Limit the number of results to the top k."""
-        clone = self.clone()
-        clone._top_k = k
-        return clone
+        self.limit = 20
 
     def run_query(self) -> Iterator["BaseStorageDocument"]:
         """Execute the query and return the results."""

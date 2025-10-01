@@ -48,7 +48,7 @@ class PgVectorQuerySet(BaseStorageQuerySet["PgVectorProvider"]):
         for key, value in filter_map.items():
             queryset = queryset.filter(**{f"metadata__{key}": value})
 
-        queryset = queryset[: self._top_k]
+        queryset = queryset[self.offset : self.limit]
 
         for instance in queryset:
             yield self.get_instance(instance)

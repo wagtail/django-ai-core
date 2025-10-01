@@ -35,11 +35,16 @@ class LlamaIndexQuerySet(BaseStorageQuerySet["LlamaIndexProvider"]):
         if self.ordering:
             raise NotImplementedError("Ordering is not supported for querying")
 
+        if self.offset:
+            raise NotImplementedError(
+                "Offsets are not supported for the Llamaindex provider"
+            )
+
         metadata_filters = MetadataFilters.from_dict(filter_map)
 
         query = VectorStoreQuery(
             query_embedding=embedding,
-            similarity_top_k=self._top_k,
+            similarity_top_k=self.limit,
             filters=metadata_filters,
         )
         if storage_provider.vector_store is None:
