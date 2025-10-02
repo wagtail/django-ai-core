@@ -37,9 +37,10 @@ class BaseStorageDocument(VirtualModel):
     document_key: str
     content: str
     metadata: dict[str, Any]
+    score: float = 0
 
     class Meta:
-        fields = ["document_key", "content", "metadata"]
+        fields = ["document_key", "content", "metadata", "score"]
         storage_provider: "StorageProvider"
 
     def __str__(self):

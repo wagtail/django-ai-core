@@ -174,3 +174,6 @@ if AI_CORE_TESTAPP_STORAGE_PROVIDER == "pgvector":
             "postgres://postgres:postgres@127.0.0.1:5432/postgres"
         ),
     }
+
+AI_CORE_TESTAPP_QDRANT_HOST = os.environ.get("AI_CORE_TESTAPP_QDRANT_HOST", None)
+AI_CORE_TESTAPP_QDRANT_API_KEY = os.environ.get("AI_CORE_TESTAPP_QDRANT_API_KEY", None)

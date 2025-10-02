@@ -29,6 +29,15 @@ elif storage_provider_setting == "s3vectors":
     storage_provider = S3VectorProvider(
         bucket_name="prototyping-vector-bucket", dimensions=1536
     )
+elif storage_provider_setting == "qdrant":
+    from django_ai_core.contrib.index.storage.qdrant import QdrantProvider
+
+    storage_provider = QdrantProvider(
+        host=settings.AI_CORE_TESTAPP_QDRANT_HOST,
+        port=6333,
+        api_key=settings.AI_CORE_TESTAPP_QDRANT_API_KEY,
+        dimensions=1536,
+    )
 else:
     from django_ai_core.contrib.index.storage.inmemory import InMemoryProvider
 

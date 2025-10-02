@@ -16,6 +16,7 @@ class S3VectorQuerySet(BaseStorageQuerySet["S3VectorProvider"]):
                 document_key=val["key"],
                 content=content,
                 metadata=metadata,
+                score=1 - val["distance"],
             )
         else:
             return val

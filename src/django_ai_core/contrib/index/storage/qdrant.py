@@ -1,3 +1,5 @@
+import uuid
+
 from qdrant_client import QdrantClient
 from qdrant_client.http import models as qdrant_models
 from qdrant_client.models import Distance
@@ -5,18 +7,23 @@ from qdrant_client.models import Distance
 from ..schema import EmbeddedDocument
 from .base import BaseStorageDocument, BaseStorageQuerySet, StorageProvider
 
+# Key used for storing original content in metadata
+CONTENT_METADATA_KEY = "dj_ai_core_content"
+
 
 class QdrantQuerySet(BaseStorageQuerySet["QdrantProvider"]):
     def get_instance(self, val) -> BaseStorageDocument:
         if self.model:
-            metadata = val["metadata"]
+            metadata = val.payload
+            content = metadata.pop(CONTENT_METADATA_KEY)
             return self.model(
-                document_key=val["key"],
-                content="",
+                document_key=metadata["document_key"],
+                content=content,
                 metadata=metadata,
+                score=val.score,
             )
         else:
-            return val
+            return val.payload
 
     def run_query(self):
         if not self.storage_provider:
@@ -51,7 +58,7 @@ class QdrantQuerySet(BaseStorageQuerySet["QdrantProvider"]):
             query_filter=qdrant_models.Filter(must=filters),
         )
 
-        for vector in response["vectors"]:
+        for vector in response:
             yield self.get_instance(vector)
 
 
@@ -89,7 +96,13 @@ class QdrantProvider(StorageProvider):
         for doc in documents:
             points.append(
                 qdrant_models.PointStruct(
-                    id=doc.document_key, vector=doc.vector, payload=doc.metadata
+                    id=str(uuid.uuid4()),
+                    vector=doc.vector,
+                    payload={
+                        **doc.metadata,
+                        CONTENT_METADATA_KEY: doc.content,
+                        "document_key": doc.document_key,
+                    },
                 )
             )
 
@@ -99,7 +112,16 @@ class QdrantProvider(StorageProvider):
         """Delete documents by their keys."""
         self.client.delete(
             collection_name=self.index_name,
-            points_selector=qdrant_models.PointIdsList(points=document_keys),
+            points_selector=qdrant_models.FilterSelector(
+                filter=qdrant_models.Filter(
+                    must=[
+                        qdrant_models.FieldCondition(
+                            key="document_key",
+                            match=qdrant_models.MatchAny(any=document_keys),
+                        )
+                    ]
+                )
+            ),
         )
 
     def clear(self):

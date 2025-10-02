@@ -1,12 +1,10 @@
-from typing import TYPE_CHECKING, Generator, Type
-
-from pgvector.django import CosineDistance
+from typing import TYPE_CHECKING, Generator, Type, cast
 
 from ...schema import EmbeddedDocument
 from ..base import BaseStorageDocument, BaseStorageQuerySet, StorageProvider
 
 if TYPE_CHECKING:
-    from .models import BasePgVectorEmbedding
+    from .models import BasePgVectorEmbedding, PgvectorEmbeddingQuerySet
 
 
 class PgVectorQuerySet(BaseStorageQuerySet["PgVectorProvider"]):
@@ -18,6 +16,7 @@ class PgVectorQuerySet(BaseStorageQuerySet["PgVectorProvider"]):
             document_key=val.document_key,
             content=val.content,
             metadata=val.metadata,
+            score=1 - val.distance,
         )
 
     def run_query(self) -> Generator[BaseStorageDocument, None, None]:
@@ -41,8 +40,9 @@ class PgVectorQuerySet(BaseStorageQuerySet["PgVectorProvider"]):
             raise ValueError("Model class is required")
 
         queryset = model.objects.filter(index_name=storage_provider.index_name)
+        queryset = cast("PgvectorEmbeddingQuerySet", queryset)
 
-        queryset = queryset.order_by(CosineDistance("vector", embedding))
+        queryset = queryset.annotate_with_distance(embedding).order_by("distance")
 
         # Apply metadata filters if any
         for key, value in filter_map.items():
