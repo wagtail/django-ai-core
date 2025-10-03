@@ -39,6 +39,7 @@ class AgentExecutionView(View):
         return JsonResponse(
             {
                 "slug": agent.slug,
+                "name": agent.name,
                 "description": agent.description,
                 "parameters": [param.as_dict() for param in agent.parameters or []],
             }

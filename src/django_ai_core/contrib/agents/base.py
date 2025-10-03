@@ -29,8 +29,9 @@ class Agent(ABC):
     """Base class for agents."""
 
     slug: str
-    description: str
-    parameters: list[AgentParameter] | None
+    name: str = ""
+    description: str = ""
+    parameters: list[AgentParameter] | None = None
 
     @classmethod
     def as_view(cls):

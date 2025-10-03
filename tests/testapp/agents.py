@@ -6,6 +6,7 @@ from django_ai_core.contrib.agents import Agent, registry
 @registry.register()
 class BasicAgent(Agent):
     slug = "basic"
+    name = "Basic Agent"
     description = "Basic agent that just takes a prompt and returns a response."
 
     def execute(self, *, prompt: Annotated[str, "The prompt to use for the agent"]):
@@ -15,6 +16,7 @@ class BasicAgent(Agent):
 @registry.register()
 class StubAgent(Agent):
     slug = "stub"
+    name = "Stub Agent"
     description = "Basic agent that just takes a prompt and returns a response."
 
     def execute(self):

@@ -7,6 +7,7 @@ from django_ai_core.contrib.agents.base import Agent, AgentParameter
 
 class TestAgent(Agent):
     slug = "test-agent"
+    name = "Test"
     description = "Test agent for testing"
     parameters = [
         AgentParameter(
@@ -111,6 +112,7 @@ def test_derive_parameters_from_signature():
 
     class TestAgentWithAnnotations(Agent):
         slug = "test-annotated"
+        name = "Test"
         description = "Test agent with type annotations"
 
         def execute(
@@ -142,6 +144,7 @@ def test_derive_parameters_without_descriptions():
 
     class TestAgentAnnotatedWithoutDescriptions(Agent):
         slug = "test-no-desc"
+        name = "Test"
         description = "Test agent without descriptions"
 
         def execute(self, *, value: str, flag: bool):
@@ -168,6 +171,7 @@ def test_explicit_parameters_override_derived():
 
     class AgentWithExplicitParams(Agent):
         slug = "test-explicit"
+        name = "Test"
         description = "Test agent with explicit parameters"
         parameters = [
             AgentParameter(
@@ -191,6 +195,7 @@ def test_explicit_parameters_override_derived():
 def test_agent_without_parameter_schema():
     class AgentWithNoParams(Agent):
         slug = "test-explicit"
+        name = "Test"
         description = "Test agent with explicit parameters"
 
         def execute(self, *, name):
@@ -199,3 +204,30 @@ def test_agent_without_parameter_schema():
     agent = AgentWithNoParams()
 
     assert not agent.parameters
+
+
+def test_agent_without_name():
+    class AgentWithNoName(Agent):
+        slug = "test-no-name"
+        description = "Test agent with no name"
+
+        def execute(self):
+            return "result"
+
+    agent = AgentWithNoName()
+
+    assert agent.name == ""
+
+
+def test_agent_with_name():
+    class AgentWithName(Agent):
+        slug = "test-name"
+        name = "Test"
+        description = "Test agent with name"
+
+        def execute(self):
+            return "result"
+
+    agent = AgentWithName()
+
+    assert agent.name == "Test"

@@ -20,6 +20,7 @@ from django_ai_core.contrib.agents.permissions import AllowAny
 
 class MyAgent(Agent):
     slug = "my-agent"
+    name = "My Agent"
     permission = AllowAny()
 
     def execute(self):
@@ -36,6 +37,7 @@ from django_ai_core.contrib.agents.permissions import IsAuthenticated
 
 class SecureAgent(Agent):
     slug = "secure-agent"
+    name = 'Secure Agent"
     description = "Agent that requires authentication"
     permission = IsAuthenticated()
     parameters = []
@@ -54,6 +56,7 @@ from django_ai_core.contrib.agents.permissions import DjangoPermission
 
 class AdminAgent(Agent):
     slug = "admin-agent"
+    name = "Admin Agent"
     description = "Agent requiring admin permission"
     permission = DjangoPermission("myapp.can_use_admin_agent")
     parameters = []
@@ -76,6 +79,7 @@ from django_ai_core.contrib.agents.permissions import (
 
 class SuperSecureAgent(Agent):
     slug = "super-secure-agent"
+    name = "Super Secure Agent"
     description = "Agent with multiple permission requirements"
     permission = CompositePermission(
         [
@@ -91,6 +95,7 @@ class SuperSecureAgent(Agent):
 
 class FlexibleAgent(Agent):
     slug = "flexible-agent"
+    name = "Flexible Agent"
     description = "Agent with flexible permission requirements"
     permission = CompositePermission(
         [
@@ -128,6 +133,7 @@ class IPAllowlist(BasePermission):
 
 class RestrictedAgent(Agent):
     slug = "restricted-agent"
+    name = "Restricted Agent"
     description = "Agent only accessible from specific IPs"
     permission = IPAllowlist(['192.168.1.100', '10.0.0.5'])
     parameters = []

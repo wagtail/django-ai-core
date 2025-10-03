@@ -24,6 +24,7 @@ from django_ai_core.llm import LLMService
 @registry.register()
 class SimplePromptAgent(Agent):
     slug = "prompt"
+    name = "Basic agent"
     description = "Basic agent that just takes a prompt and returns a response from the LLM."
     parameters = [
         AgentParameter(
@@ -119,6 +120,7 @@ from django_ai_core.contrib.agents.permissions import IsAuthenticated
 @registry.register()
 class SecureAgent(Agent):
     slug = "secure"
+    name = "Secure Agent"
     description = "Agent requiring authentication"
     permission = IsAuthenticated()
     parameters = []
