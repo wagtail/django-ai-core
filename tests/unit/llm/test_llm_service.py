@@ -17,6 +17,12 @@ def mock_any_llm():
     return MockAnyLLM()
 
 
+def test_llm_service_create_passes_kwargs_to_anyllm(mock_any_llm):
+    with mock.patch.object(AnyLLM, "create", return_value=mock.Mock()) as mock_create:
+        LLMService.create(provider="foo", model="foo", foo="bar")
+        mock_create.assert_called_once_with(provider="foo", foo="bar")
+
+
 def test_llm_service_completion_wraps_anyllm(mock_any_llm):
     messages = [
         {

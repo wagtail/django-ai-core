@@ -13,8 +13,8 @@ class LLMService:
         self.model = model
 
     @classmethod
-    def create(cls, *, provider: str, model: str) -> "LLMService":
-        client = AnyLLM.create(provider=provider)
+    def create(cls, *, provider: str, model: str, **kwargs) -> "LLMService":
+        client = AnyLLM.create(provider=provider, **kwargs)
         return cls(client=client, model=model)
 
     @property
