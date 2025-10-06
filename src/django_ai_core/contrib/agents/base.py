@@ -1,13 +1,15 @@
 import inspect
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Annotated, get_args, get_origin
+from typing import Annotated, Callable, TypeVar, get_args, get_origin
 
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_slug
 
 from .permissions import BasePermission
 from .views import AgentExecutionView
+
+AgentT = TypeVar("AgentT", bound="Agent")
 
 
 @dataclass
@@ -79,15 +81,20 @@ class AgentRegistry:
     def __init__(self):
         self._agents: dict[str, type[Agent]] = {}
 
-    def register(self):
-        """Decorator to register an agent."""
+    def register(
+        self, cls: type[AgentT] | None = None
+    ) -> type[AgentT] | Callable[[type[AgentT]], type[AgentT]]:
+        def decorator(agent_cls: type[AgentT]) -> type[AgentT]:
+            agent_slug = agent_cls.slug
+            self._agents[agent_slug] = agent_cls
+            return agent_cls
 
-        def decorator(cls: type[Agent]) -> type[Agent]:
-            agent_slug = cls.slug
-            self._agents[agent_slug] = cls
-            return cls
-
-        return decorator
+        if cls is None:
+            # Called with parentheses: @registry.register()
+            return decorator
+        else:
+            # Called without parentheses: @registry.register
+            return decorator(cls)
 
     def get(self, slug: str) -> type[Agent]:
         if slug not in self._agents:
