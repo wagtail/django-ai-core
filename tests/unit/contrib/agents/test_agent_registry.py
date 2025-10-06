@@ -31,6 +31,16 @@ def test_agent_registry_register_uses_agent_slug():
     assert registry._agents["test-one"] is TestAgentOne
 
 
+def test_agent_registry_register_without_parentheses():
+    """Test that register can be called without parentheses."""
+    registry = AgentRegistry()
+
+    decorated = registry.register(TestAgentOne)
+    assert decorated is TestAgentOne
+    assert "test-one" in registry._agents
+    assert registry._agents["test-one"] is TestAgentOne
+
+
 def test_agent_registry_register_multiple_agents():
     """Test registering multiple agents with the registry."""
     registry = AgentRegistry()
