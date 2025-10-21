@@ -11,8 +11,6 @@ class InMemoryQuerySet(BaseStorageQuerySet["InMemoryProvider"]):
         storage_provider = self.storage_provider
         filter_map = {filter[0]: filter[1] for filter in self.filters}
 
-        limit = self.limit or 10
-
         embedding = filter_map.pop("embedding", None)
         if embedding is None:
             raise ValueError("embedding filter is required")
@@ -31,7 +29,7 @@ class InMemoryQuerySet(BaseStorageQuerySet["InMemoryProvider"]):
             similarities, key=lambda pair: pair[0], reverse=True
         )
         for document in [pair[1] for pair in sorted_similarities][
-            self.offset : self.offset + limit
+            self.start : self.stop
         ]:
             yield document
 

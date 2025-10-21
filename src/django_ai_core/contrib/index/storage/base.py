@@ -21,7 +21,7 @@ class BaseStorageQuerySet(Queryish, Generic[StorageProviderType]):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.limit = 20
+        self.stop = 20
 
     def run_query(self) -> Iterator["BaseStorageDocument"]:
         """Execute the query and return the results."""
