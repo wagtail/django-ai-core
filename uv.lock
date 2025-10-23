@@ -345,7 +345,7 @@ wheels = [
 
 [[package]]
 name = "django-ai-core"
-version = "0.1.4"
+version = "0.1.5"
 source = { editable = "." }
 dependencies = [
     { name = "any-llm-sdk" },
