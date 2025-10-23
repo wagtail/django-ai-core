@@ -101,7 +101,7 @@ class MockStorageQuerySet(BaseStorageQuerySet):
 
     def run_query(self):
         """Mock run_query that returns documents with respect to limit."""
-        limit = self.limit or len(self._documents)
+        limit = self.stop or len(self._documents)
         yield from self._documents[:limit]
 
 

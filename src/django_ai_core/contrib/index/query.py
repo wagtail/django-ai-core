@@ -59,8 +59,8 @@ class SourceResultMixin(BaseResultMixin):
     Mixin for source search - returns unique source objects with over-fetching.
 
     This mixin overrides run_query() to implement over-fetching
-    and deduplication. By the time run_query() is called, self.limit and
-    self.offset have been set by slicing operations.
+    and deduplication. By the time run_query() is called, self.start and
+    self.stop have been set by slicing operations.
     """
 
     overfetch_multiplier: int = 3
@@ -80,8 +80,8 @@ class SourceResultMixin(BaseResultMixin):
         """
         Execute query with over-fetching and deduplication.
         """
-        requested_limit = getattr(self, "limit", None) or 20
-        requested_offset = getattr(self, "offset", None) or 0
+        requested_limit = self.limit
+        requested_offset = self.offset or 0
 
         yield from self._overfetch(requested_offset, requested_limit)
 
@@ -126,7 +126,7 @@ class SourceResultMixin(BaseResultMixin):
         This method calls the parent class's (storage provider's) run_query()
         with specific offset and limit.
         """
-        temp_qs = self.clone(limit=limit)  # type: ignore
+        temp_qs = self.clone(start=0, stop=limit)  # type: ignore
 
         # Skip SourceResultMixin in the MRO of temp_qs to resolve
         # run_query to the method on the storage provided queryish object
