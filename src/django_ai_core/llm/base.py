@@ -1,14 +1,28 @@
 import logging
+import warnings
 
 from any_llm import AnyLLM
 
 logger = logging.getLogger(__name__)
 
+_DEPRECATION_MESSAGE = (
+    "LLMService is deprecated and will be removed in a future release. Use the "
+    "generative module instead: GenerativeService.for_role(...) for "
+    "settings-driven config, or resolve_generative_provider(...) to use a "
+    "provider directly. See django_ai_core.generative."
+)
+
 
 class LLMService:
-    """Light wrapper around any-llm"""
+    """Light wrapper around any-llm.
+
+    .. deprecated::
+        Superseded by ``django_ai_core.generative``. Use ``GenerativeService``
+        (role-resolved) or ``resolve_generative_provider`` (direct provider).
+    """
 
     def __init__(self, *, client: AnyLLM, model: str):
+        warnings.warn(_DEPRECATION_MESSAGE, DeprecationWarning, stacklevel=2)
         self.client = client
         self.model = model
 

@@ -18,7 +18,7 @@ Register your agents in your application using the Agent registry:
 ```python
 # agents.py
 from django_ai_core.contrib.agents import Agent, AgentParameter, registry
-from django_ai_core.llm import LLMService
+from django_ai_core.generative import GenerativeService
 
 
 @registry.register()
@@ -35,10 +35,15 @@ class SimplePromptAgent(Agent):
     ]
 
     def execute(self, *, prompt: str):
-        service = LLMService.create(provider="openai", model="gpt-4o")
+        service = GenerativeService.for_role("prompt")
         response = service.completion(prompt)
 
 ```
+
+The agent resolves a role from settings via
+[`GenerativeService`](../generative/), so the model and vendor are configured in
+`AI_CORE['GENERATIVE_MODELS']` rather than hard-coded in the agent. See the
+[Generative module](../generative/) for provider configuration.
 
 These can be in any file you want, but if you use a file like `agents.py`, you'll need to make sure Django loads it in your `apps.py`:
 

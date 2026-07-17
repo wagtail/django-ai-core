@@ -138,7 +138,7 @@ Embedding Transformers take Documents produced by Sources and pass them to an AI
 
 ### CoreEmbeddingTransformer
 
-This package comes with a built-in embedding transformer that uses the core [LLMService](../core.md#llm-service) to embed documents.
+This package comes with a built-in embedding transformer that uses the deprecated [LLMService](../generative/legacy-llm-service.md) to embed documents.
 
 It can be instantiated with an `LLMService` instance:
 
