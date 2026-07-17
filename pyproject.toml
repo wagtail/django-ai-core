@@ -10,7 +10,7 @@ authors = [
 ]
 requires-python = ">=3.11"
 dependencies = [
-    "any-llm-sdk==0.20.3",
+    "any-llm-sdk==1.19.0",
     "queryish>=0.3.0",
 ]
 classifiers = [

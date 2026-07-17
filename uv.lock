@@ -16,19 +16,40 @@ wheels = [
 ]
 
 [[package]]
-name = "any-llm-sdk"
-version = "0.20.3"
+name = "anthropic"
+version = "0.116.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
+    { name = "anyio" },
+    { name = "distro" },
+    { name = "docstring-parser" },
+    { name = "httpx" },
+    { name = "jiter" },
+    { name = "pydantic" },
+    { name = "sniffio" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/66/a2/d31f14e28d49bae983a3634e38dfb4b31c50110b5e403596c5c6a20b23f8/anthropic-0.116.0.tar.gz", hash = "sha256:5fc248fbb9fe03ef686f8a774f81586bca31a043260aab88b387ea3660f4a396", size = 949149, upload-time = "2026-07-02T19:08:10.534Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c7/dd/2a1e81cf1b163acc340afc4ec74ed1d86f5eed1a809fabdeed3e0997b346/anthropic-0.116.0-py3-none-any.whl", hash = "sha256:6c0a7698e8d652455da3499978279bb2588c7264d0a35be3666009a4258c8256", size = 956896, upload-time = "2026-07-02T19:08:08.756Z" },
+]
+
+[[package]]
+name = "any-llm-sdk"
+version = "1.19.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "anthropic" },
     { name = "httpx" },
     { name = "openai" },
+    { name = "openresponses-types" },
     { name = "pydantic" },
     { name = "rich" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ac/10/2317ed09a9037b54f813a79891589cedbcdecb3a750676c0d0d1302dea5d/any_llm_sdk-0.20.3.tar.gz", hash = "sha256:fc2524cdbb24bd3b600c79ff8c15f3070bf64c31b90976d864af7cf1429b9645", size = 2866665, upload-time = "2025-09-20T18:31:12.971Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/45/40/70f1f1a71baaf99f3946307e5dcd38ecfb93f5b0a9e3381213ca51c0c58f/any_llm_sdk-1.19.0.tar.gz", hash = "sha256:dfcb315999f1eeb5a835a7ea0c4ab4d3c06b40c9dc9927725d1c6a1311ff72ce", size = 157107, upload-time = "2026-06-26T10:00:52.865Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/1d/6b/70e60b60cd072f9295a93ba71e9473f84264e6936e201ce7042d008e0612/any_llm_sdk-0.20.3-py3-none-any.whl", hash = "sha256:e9c7e3d7f9ae7228329583e2fa922a3538c0217c1d80446460dba6a17580a714", size = 109041, upload-time = "2025-09-20T18:31:11.495Z" },
+    { url = "https://files.pythonhosted.org/packages/1c/fb/8f5e8a0ec2eddb020542eb187d83fe44f66afee35929a5bc22f820599295/any_llm_sdk-1.19.0-py3-none-any.whl", hash = "sha256:1e91ff18a07107ebb1bf6e8175cc8580f48e4d6b58ca5932a39a7f9e72c8c521", size = 207352, upload-time = "2026-06-26T10:00:51.262Z" },
 ]
 
 [[package]]
@@ -376,7 +397,7 @@ test = [
 
 [package.metadata]
 requires-dist = [
-    { name = "any-llm-sdk", specifier = "==0.20.3" },
+    { name = "any-llm-sdk", specifier = "==1.19.0" },
     { name = "queryish", specifier = ">=0.3.0" },
 ]
 
@@ -428,6 +449,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/9b/6f/a0bab0e6a7676ab3ca02d51b459444e9bd6dd747e3a43b9c24cae6d0a1c6/django_stubs_ext-5.2.7.tar.gz", hash = "sha256:b690655bd4cb8a44ae57abb314e0995dc90414280db8f26fff0cb9fb367d1cac", size = 6524, upload-time = "2025-10-08T08:00:38.895Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/f8/c9/60445606e26706d3fccadf3b80ee1a9f32c1012683ff2ada7580937b2da9/django_stubs_ext-5.2.7-py3-none-any.whl", hash = "sha256:0466a7132587d49c5bbe12082ac9824d117a0dedcad5d0ada75a6e0d3aca6f60", size = 9979, upload-time = "2025-10-08T08:00:37.499Z" },
+]
+
+[[package]]
+name = "docstring-parser"
+version = "0.18.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/e0/4d/f332313098c1de1b2d2ff91cf2674415cc7cddab2ca1b01ae29774bd5fdf/docstring_parser-0.18.0.tar.gz", hash = "sha256:292510982205c12b1248696f44959db3cdd1740237a968ea1e2e7a900eeb2015", size = 29341, upload-time = "2026-04-14T04:09:19.867Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a7/5f/ed01f9a3cdffbd5a008556fc7b2a08ddb1cc6ace7effa7340604b1d16699/docstring_parser-0.18.0-py3-none-any.whl", hash = "sha256:b3fcbed555c47d8479be0796ef7e19c2670d428d72e96da63f3a40122860374b", size = 22484, upload-time = "2026-04-14T04:09:18.638Z" },
 ]
 
 [[package]]
@@ -907,6 +937,18 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/ee/c7/e42bcd89dfd47fec8a30b9e20f93e512efdbfbb3391b05bbb79a2fb295fa/openai-2.6.0.tar.gz", hash = "sha256:f119faf7fc07d7e558c1e7c32c873e241439b01bd7480418234291ee8c8f4b9d", size = 592904, upload-time = "2025-10-20T17:17:24.588Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/c0/0a/58e9dcd34abe273eaeac3807a8483073767b5609d01bb78ea2f048e515a0/openai-2.6.0-py3-none-any.whl", hash = "sha256:f33fa12070fe347b5787a7861c8dd397786a4a17e1c3186e239338dac7e2e743", size = 1005403, upload-time = "2025-10-20T17:17:22.091Z" },
+]
+
+[[package]]
+name = "openresponses-types"
+version = "2.3.0.post1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pydantic" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/d9/26/b612c3215f5599714fa94d63eb5ee59b4eb66dbdeeaf86bb4d848359484d/openresponses_types-2.3.0.post1.tar.gz", hash = "sha256:11b8896d3621d2ac2439f6ff106f34ddcb1bbd517c317a6c852a9df2e98a0753", size = 19254, upload-time = "2026-01-22T20:02:03.933Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b2/5f/e16dad89ed24f586da5b01b9b206d3adbf21fe1af8e4dc55d5b93158fde6/openresponses_types-2.3.0.post1-py3-none-any.whl", hash = "sha256:88f6abcef9cad839203abff420dd080978bf6eb33cc06ddc5d78da4ccdba7613", size = 13847, upload-time = "2026-01-22T20:02:02.582Z" },
 ]
 
 [[package]]
