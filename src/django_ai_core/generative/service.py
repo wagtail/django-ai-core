@@ -6,8 +6,9 @@ import time
 from collections.abc import AsyncIterator, Iterator
 from typing import Any
 
+from django_ai_core.usage import UsageCapture
+
 from .providers import GenerativeProvider
-from .providers.base import UsageCapture
 from .resolve import resolve_generative_provider
 
 logger = logging.getLogger(__name__)

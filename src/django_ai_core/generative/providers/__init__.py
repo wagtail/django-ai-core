@@ -1,3 +1,3 @@
-from .base import EmbeddingProvider, GenerativeProvider
+from .base import GenerativeProvider
 
-__all__ = ["EmbeddingProvider", "GenerativeProvider"]
+__all__ = ["GenerativeProvider"]

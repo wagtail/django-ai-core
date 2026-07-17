@@ -21,7 +21,7 @@ control. Most apps only ever need the service layer.
 | --- | --- | --- | --- |
 | **Service** | You just want completions or embeddings — text in, text out — and want to swap the model/vendor from settings without touching code. The common case. | `GenerativeService.for_role("chat")` | Only the generic `completion` / `stream` surface; no backend-specific methods. |
 | **Direct provider** | You need methods the service does not expose — a custom provider's domain methods (rerank, classify, structured output), or the provider object itself — while still resolving config from settings. | `resolve_generative_provider("chat")` | The thin service wrapper (roles, uniform surface); you hold the provider directly. |
-| **Custom provider** | No shipped provider fits — you are integrating a backend that is not covered, or adding domain-specific methods on top of one. Authoring, not just consuming. | Subclass `GenerativeProvider` / `EmbeddingProvider` — see [Writing a custom provider](custom-providers.md). | Nothing — but you now own the backend integration and its tests. |
+| **Custom provider** | No shipped provider fits — you are integrating a backend that is not covered, or adding domain-specific methods on top of one. Authoring, not just consuming. | Subclass `GenerativeProvider` (in `django_ai_core.generative`) or `EmbeddingProvider` (in `django_ai_core.embedding`) — see [Writing a custom provider](custom-providers.md). | Nothing — but you now own the backend integration and its tests. |
 
 Rule of thumb: **start at the service layer.** Drop to a direct provider only
 when you need a method it does not forward, and write a custom provider only when
@@ -62,7 +62,10 @@ AI_CORE = {
         },
     },
     "EMBEDDING_MODELS": {
-        # same shape: role -> {"provider": "...", "params": {...}}
+        "default": {
+            "provider": "django_ai_core.embedding.providers.anyllm.AnyLLMEmbeddingProvider",
+            "params": {"provider": "openai", "model": "text-embedding-3-small"},
+        },
     },
 }
 ```
@@ -70,13 +73,14 @@ AI_CORE = {
 `params` are passed to the provider constructor. For `AnyLLMProvider` that means
 `provider` (the any-llm vendor id) and `model`, plus any extra client kwargs.
 
-!!! note "Embeddings not wired up yet"
+!!! note "Embeddings: provider ships, index consumption is a TODO"
 
-    `EMBEDDING_MODELS` and `resolve_embedding_provider` work, but no shipped
-    provider implements embeddings yet and nothing in the library consumes them
-    (the index module still uses the deprecated `LLMService`). You can point a
-    role at your own [custom `EmbeddingProvider`](custom-providers.md#embeddingprovider);
-    broader integration is a TODO.
+    `EMBEDDING_MODELS`, `resolve_embedding_provider`, and the shipped
+    `AnyLLMEmbeddingProvider` all work today. What is not yet wired is
+    *consumption inside the library*: the index module still embeds via the
+    deprecated `LLMService` rather than an `EmbeddingProvider`. You can also
+    point a role at your own
+    [custom `EmbeddingProvider`](custom-providers.md#embedding-providers).
 
 Misconfiguration is surfaced eagerly as Django's `ImproperlyConfigured` at
 resolution time (missing role, missing `provider` key, unimportable path, wrong

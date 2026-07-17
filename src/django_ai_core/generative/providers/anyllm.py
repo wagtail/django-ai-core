@@ -19,94 +19,15 @@ Reference by dotted path from ``AI_CORE['GENERATIVE_MODELS']``::
 
 from __future__ import annotations
 
-import os
 from collections.abc import AsyncIterator, Iterator
-from contextlib import contextmanager
-
-# any-llm only converts vendor SDK errors into its unified ``AnyLLMError``
-# hierarchy when this flag is set (otherwise it re-raises the raw vendor error
-# with a deprecation warning). We depend on the unified types, so enable it by
-# default — ``setdefault`` leaves an explicit consumer choice untouched. Must be
-# set before any completion call; any-llm reads the env var at raise time.
-os.environ.setdefault("ANY_LLM_UNIFIED_EXCEPTIONS", "1")
 
 from any_llm import AnyLLM
-from any_llm.exceptions import (
-    AuthenticationError,
-    ContextLengthExceededError,
-    GatewayTimeoutError,
-    InsufficientFundsError,
-    InvalidRequestError,
-    MissingApiKeyError,
-    ModelNotFoundError,
-    ProviderError,
-    RateLimitError,
-    UnsupportedParameterError,
-    UnsupportedProviderError,
-    UpstreamProviderError,
-)
 
-from ...exceptions import (
-    AICoreProviderError,
-    ProviderConfigurationError,
-    ProviderRateLimitError,
-    ProviderResponseError,
-    ProviderTimeoutError,
-    ProviderUnavailableError,
-    ProviderUnexpectedError,
-)
-from .base import GenerativeProvider, UsageCapture
+from django_ai_core.providers.anyllm import fill_usage, translate_errors
+from django_ai_core.usage import UsageCapture
 
-# Maps any-llm's unified exceptions to our semantic ``AICoreProviderError`` types,
-# giving consumers a stable contract while leaving any-llm's own exceptions
-# catchable for those who want finer control. any-llm's ``ProviderError`` is a
-# catch-all (transport failures, 5xx, unclassified) we can't split without
-# sniffing SDK class names, so it maps whole to ``ProviderUnexpectedError`` — as
-# does anything unmatched, via _translate's fallback.
-_EXCEPTION_MAP = (
-    (RateLimitError, ProviderRateLimitError),
-    (GatewayTimeoutError, ProviderTimeoutError),
-    (UpstreamProviderError, ProviderUnavailableError),
-    (ProviderError, ProviderUnexpectedError),
-    (
-        (
-            AuthenticationError,
-            MissingApiKeyError,
-            UnsupportedProviderError,
-            UnsupportedParameterError,
-            InvalidRequestError,
-            ModelNotFoundError,
-            ContextLengthExceededError,
-            InsufficientFundsError,
-        ),
-        ProviderConfigurationError,
-    ),
-)
-
-
-def _translate(exc: Exception) -> AICoreProviderError:
-    """Map a raw any-llm error to a semantic provider error.
-
-    Already-semantic errors pass through. Unified any-llm exceptions map to
-    their semantic equivalent; anything else is a real-but-unclassified failure.
-    """
-    if isinstance(exc, AICoreProviderError):
-        return exc
-    for exc_types, target in _EXCEPTION_MAP:
-        if isinstance(exc, exc_types):
-            return target(str(exc))
-    return ProviderUnexpectedError(str(exc))
-
-
-@contextmanager
-def _translate_errors():
-    """Re-raise any raw provider failure as a semantic ``AICoreProviderError``."""
-    try:
-        yield
-    except AICoreProviderError:
-        raise
-    except Exception as exc:
-        raise _translate(exc) from exc
+from ...exceptions import ProviderResponseError
+from .base import GenerativeProvider
 
 
 def build_messages(
@@ -142,23 +63,6 @@ def _message_text(response: object) -> str:
     return response.choices[0].message.content or ""
 
 
-def _fill_usage(capture: UsageCapture, chunk: object) -> None:
-    """Copy any usage on this chunk into ``capture`` (best-effort, no raise).
-
-    any-llm sets ``.usage`` (``prompt_tokens`` / ``completion_tokens``) only on
-    the terminal chunk of a clean finish. A cancelled stream never reaches it, so
-    ``capture`` stays ``None``."""
-    usage = getattr(chunk, "usage", None)
-    if usage is None:
-        return
-    prompt_tokens = getattr(usage, "prompt_tokens", None)
-    completion_tokens = getattr(usage, "completion_tokens", None)
-    if prompt_tokens is not None:
-        capture.input_tokens = prompt_tokens
-    if completion_tokens is not None:
-        capture.output_tokens = completion_tokens
-
-
 def _require_content(text: str) -> str:
     if not text:
         raise ProviderResponseError("provider returned an empty response")
@@ -176,7 +80,7 @@ class AnyLLMProvider(GenerativeProvider):
 
     def completion(self, prompt, *, system=None, history=None, **kwargs) -> str:
         messages = build_messages(prompt, system=system, history=history)
-        with _translate_errors():
+        with translate_errors():
             resp = self._client.completion(
                 model=self.model, messages=messages, stream=False, **kwargs
             )
@@ -184,7 +88,7 @@ class AnyLLMProvider(GenerativeProvider):
 
     async def acompletion(self, prompt, *, system=None, history=None, **kwargs) -> str:
         messages = build_messages(prompt, system=system, history=history)
-        with _translate_errors():
+        with translate_errors():
             resp = await self._client.acompletion(
                 model=self.model, messages=messages, stream=False, **kwargs
             )
@@ -200,12 +104,12 @@ class AnyLLMProvider(GenerativeProvider):
         **kwargs,
     ) -> Iterator[str]:
         messages = build_messages(prompt, system=system, history=history)
-        with _translate_errors():
+        with translate_errors():
             for chunk in self._client.completion(
                 model=self.model, messages=messages, stream=True, **kwargs
             ):
                 if usage_capture is not None:
-                    _fill_usage(usage_capture, chunk)
+                    fill_usage(usage_capture, chunk)
                 text = _delta_text(chunk)
                 if text:
                     yield text
@@ -220,13 +124,13 @@ class AnyLLMProvider(GenerativeProvider):
         **kwargs,
     ) -> AsyncIterator[str]:
         messages = build_messages(prompt, system=system, history=history)
-        with _translate_errors():
+        with translate_errors():
             stream = await self._client.acompletion(
                 model=self.model, messages=messages, stream=True, **kwargs
             )
             async for chunk in stream:
                 if usage_capture is not None:
-                    _fill_usage(usage_capture, chunk)
+                    fill_usage(usage_capture, chunk)
                 text = _delta_text(chunk)
                 if text:
                     yield text

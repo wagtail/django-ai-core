@@ -2,20 +2,15 @@ import pytest
 from django.core.exceptions import ImproperlyConfigured
 from django.test import override_settings
 
-from django_ai_core.generative.resolve import (
-    resolve_embedding_provider,
-    resolve_generative_provider,
-)
+from django_ai_core.generative.resolve import resolve_generative_provider
 
 from ._fakes import (
-    FakeEmbeddingProvider,
     FakeGenerativeProvider,
     FakeGenerativeProviderSubclass,
 )
 
 _GEN_FAKE = "generative._fakes.FakeGenerativeProvider"
 _GEN_FAKE_SUB = "generative._fakes.FakeGenerativeProviderSubclass"
-_EMB_FAKE = "generative._fakes.FakeEmbeddingProvider"
 _NOT_PROVIDER = "generative._fakes.NotAProvider"
 
 
@@ -103,26 +98,3 @@ def test_resolve_expect_matches():
 def test_resolve_expect_mismatch_raises():
     with pytest.raises(ImproperlyConfigured, match="expected"):
         resolve_generative_provider("default", expect=FakeGenerativeProviderSubclass)
-
-
-@override_settings(
-    AI_CORE={
-        "EMBEDDING_MODELS": {
-            "default": {"provider": _EMB_FAKE, "params": {"model": "e1"}}
-        }
-    }
-)
-def test_resolve_embedding_returns_instance():
-    p = resolve_embedding_provider("default")
-    assert isinstance(p, FakeEmbeddingProvider)
-    assert p.model == "e1"
-
-
-@override_settings(
-    AI_CORE={"EMBEDDING_MODELS": {"default": {"provider": _GEN_FAKE, "params": {}}}}
-)
-def test_resolve_embedding_rejects_generative_class():
-    with pytest.raises(
-        ImproperlyConfigured, match="expected subclass of EmbeddingProvider"
-    ):
-        resolve_embedding_provider("default")

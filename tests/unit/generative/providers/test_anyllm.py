@@ -27,11 +27,11 @@ from django_ai_core.generative.providers.anyllm import (
     AnyLLMProvider,
     _delta_text,
     _message_text,
-    _translate,
-    _translate_errors,
     build_messages,
 )
-from django_ai_core.generative.providers.base import UsageCapture
+from django_ai_core.providers.anyllm import translate_error as _translate
+from django_ai_core.providers.anyllm import translate_errors as _translate_errors
+from django_ai_core.usage import UsageCapture
 
 # --- build_messages -------------------------------------------------------
 

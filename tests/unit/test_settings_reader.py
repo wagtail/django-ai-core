@@ -2,7 +2,7 @@ import pytest
 from django.core.exceptions import ImproperlyConfigured
 from django.test import override_settings
 
-from django_ai_core.generative.settings import (
+from django_ai_core.settings import (
     get_ai_core_setting,
     get_embedding_models,
     get_generative_models,

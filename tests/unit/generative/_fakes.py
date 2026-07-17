@@ -4,7 +4,7 @@ Importable by normal Python path so they can be referenced from AI_CORE
 settings in tests.
 """
 
-from django_ai_core.generative.providers import EmbeddingProvider, GenerativeProvider
+from django_ai_core.generative.providers import GenerativeProvider
 
 
 class FakeGenerativeProvider(GenerativeProvider):
@@ -53,18 +53,6 @@ class FakeStreamingProvider(FakeGenerativeProvider):
         for chunk in self._chunks:
             yield chunk
         self._finish(usage_capture)
-
-
-class FakeEmbeddingProvider(EmbeddingProvider):
-    def __init__(self, *, model: str = "fake-embed", **extra):
-        self.model = model
-        self.extra = extra
-
-    def embedding(self, input, **kwargs):
-        return [[0.0] for _ in input]
-
-    async def aembedding(self, input, **kwargs):
-        return self.embedding(input, **kwargs)
 
 
 class NotAProvider:

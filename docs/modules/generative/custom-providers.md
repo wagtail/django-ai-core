@@ -8,18 +8,19 @@ vendor, stay on the [service layer](index.md#choosing-a-layer) instead.
 
 ## The interfaces
 
-Two abstract classes live in `django_ai_core.generative`, split because the jobs are split:
+Two abstract classes, one per job, split because the jobs are split:
 
-- `GenerativeProvider` — text completions.
-- `EmbeddingProvider` — vector embeddings.
+- `GenerativeProvider` (in `django_ai_core.generative`) — text completions.
+- `EmbeddingProvider` (in `django_ai_core.embedding`) — vector embeddings.
 
-One class may implement both if the backend does both jobs.
+The packages never import each other. One class may implement both by
+subclassing each ABC from its own package if the backend does both jobs.
 
 ### GenerativeProvider
 
 ```python
 from django_ai_core.generative import GenerativeProvider
-from django_ai_core.generative.providers.base import UsageCapture
+from django_ai_core.usage import UsageCapture
 
 class MyProvider(GenerativeProvider):
     def __init__(self, *, model: str, **client_kwargs):
@@ -69,23 +70,9 @@ private `_model`) so the service and any audit tooling can read it uniformly.
 
 ### EmbeddingProvider
 
-```python
-from django_ai_core.generative import EmbeddingProvider
-
-class MyEmbedder(EmbeddingProvider):
-    def embedding(self, input, **kwargs): ...        # required
-    async def aembedding(self, input, **kwargs): ...  # required
-```
-
-Both methods are required.
-
-!!! note "Not wired up yet"
-
-    `EmbeddingProvider` and `resolve_embedding_provider` exist and work, but
-    nothing in the library consumes them yet — no shipped provider implements
-    embeddings, and the index module still uses the deprecated
-    [`LLMService`](legacy-llm-service.md). The interface is ready for a custom
-    provider; broader integration is a TODO.
+`EmbeddingProvider` lives in `django_ai_core.embedding`, not in
+`django_ai_core.generative`. See [Embedding providers](#embedding-providers)
+below for the full embedding section.
 
 ## Translate failures
 
@@ -208,3 +195,83 @@ provider.rerank(docs)
 - If you fill `usage_capture`, test that a clean finish populates it and that a
   stream cancelled before the terminal frame leaves the unavailable fields
   `None`.
+
+---
+
+## Embedding providers
+
+Embedding providers are a separate top-level package: `django_ai_core.embedding`.
+They do **not** live in `django_ai_core.generative`, and the two packages never
+import each other.
+
+### The interface
+
+```python
+from django_ai_core.embedding import EmbeddingProvider
+
+class MyEmbedder(EmbeddingProvider):
+    def embedding(self, input, **kwargs): ...        # required
+    async def aembedding(self, input, **kwargs): ...  # required
+```
+
+Both `embedding` and `aembedding` are `@abstractmethod` — a concrete provider
+must implement both.
+
+### Shipped provider: AnyLLMEmbeddingProvider
+
+A batteries-included embedding provider backed by
+[`any-llm`](https://mozilla-ai.github.io/any-llm/) is shipped at:
+
+```
+django_ai_core.embedding.providers.anyllm.AnyLLMEmbeddingProvider
+```
+
+It follows the same vendor-agnostic approach as `AnyLLMProvider` for completions.
+
+### Configuration
+
+Point a role at an embedding provider via the `EMBEDDING_MODELS` key in `AI_CORE`:
+
+```python
+AI_CORE = {
+    "EMBEDDING_MODELS": {
+        "default": {
+            "provider": "django_ai_core.embedding.providers.anyllm.AnyLLMEmbeddingProvider",
+            "params": {"provider": "openai", "model": "text-embedding-3-small"},
+        },
+    },
+}
+```
+
+`params` are passed directly to the provider constructor. Each entry maps a
+role name to a `{"provider": "<dotted.path>", "params": {...}}` dict — the same
+shape used by `GENERATIVE_MODELS`.
+
+### Resolving an embedding provider
+
+```python
+from django_ai_core.embedding import resolve_embedding_provider
+
+embedder = resolve_embedding_provider("default")
+response = embedder.embedding("Hello, world!")
+```
+
+To get back a typed subclass (for custom domain methods), pass `expect=`:
+
+```python
+from django_ai_core.embedding.providers.anyllm import AnyLLMEmbeddingProvider
+
+embedder = resolve_embedding_provider("default", expect=AnyLLMEmbeddingProvider)
+```
+
+### Error translation
+
+`AnyLLMEmbeddingProvider` translates any-llm errors into the same
+`AICoreProviderError` hierarchy used by the generative module. Consumers never
+see raw vendor or any-llm exceptions.
+
+!!! note "Index module not yet wired"
+
+    `EmbeddingProvider` and `resolve_embedding_provider` are ready for use, but
+    the index module (`django_ai_core.contrib.index`) still uses the deprecated
+    `LLMService`. Migrating the index module is a planned follow-up.

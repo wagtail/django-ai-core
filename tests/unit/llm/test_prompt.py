@@ -1,4 +1,4 @@
-from django_ai_core.llm.prompt import Prompt
+from django_ai_core.prompt import Prompt
 
 
 def test_prompt_no_tokens():
