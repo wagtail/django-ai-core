@@ -1,4 +1,5 @@
 import random
+import uuid
 
 import pytest
 from testapp.models import Book
@@ -70,8 +71,11 @@ def test_model_source_returns_unique_keys():
 @pytest.mark.django_db
 def test_model_source_registers_index_by_class_name():
     class VerboseIndex:
+        def __init__(self):
+            self._unique_id = uuid.uuid4()
+
         def __repr__(self):
-            return "verbose index representation" * 100
+            return f"verbose index representation {self._unique_id} " * 100
 
     Book.objects.create(title="Book Title", description="Description")
 
