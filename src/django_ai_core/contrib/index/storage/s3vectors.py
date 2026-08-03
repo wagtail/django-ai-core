@@ -138,3 +138,29 @@ class S3VectorProvider(StorageProvider):
         self.client.delete_index(
             vectorBucketName=self.bucket_name, indexName=self.index_name
         )
+
+    def prune_to(self, document_keys_to_keep):
+        """Remove documents that are not part of the rebuilt index."""
+        document_keys_to_keep = set(document_keys_to_keep)
+        next_token = None
+
+        while True:
+            params = {
+                "vectorBucketName": self.bucket_name,
+                "indexName": self.index_name,
+            }
+            if next_token:
+                params["nextToken"] = next_token
+            response = self.client.list_vectors(**params)
+
+            stale_keys = [
+                key
+                for key in response["vectorKeys"]
+                if key not in document_keys_to_keep
+            ]
+            if stale_keys:
+                self.delete(stale_keys)
+
+            next_token = response.get("nextToken")
+            if not next_token:
+                break

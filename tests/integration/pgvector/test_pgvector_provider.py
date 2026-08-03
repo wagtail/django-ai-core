@@ -87,7 +87,7 @@ class TestPgVectorProvider:
         assert PgVectorEmbedding.objects.filter(pk="test:1").count() == 0
 
     def test_clear(self, pg_vector_provider):
-        """Test clearing all documents."""
+        """Test clearing all documents for the provider's index."""
         docs = [
             create_embedded_document(key="test:1"),
             create_embedded_document(key="test:2"),
@@ -95,6 +95,30 @@ class TestPgVectorProvider:
         pg_vector_provider.add(docs)
         pg_vector_provider.clear()
         assert PgVectorEmbedding.objects.count() == 0
+
+    def test_prune_documents_not_in_rebuild(self, pg_vector_provider):
+        pg_vector_provider.add(
+            [
+                create_embedded_document(key="test:current"),
+                create_embedded_document(key="test:stale"),
+            ]
+        )
+
+        pg_vector_provider.prune_to(["test:current"])
+
+        assert PgVectorEmbedding.objects.filter(pk="test:current").exists()
+        assert not PgVectorEmbedding.objects.filter(pk="test:stale").exists()
+
+    def test_clear_does_not_remove_documents_from_other_indexes(self):
+        first_provider = PgVectorProvider(index_name="first-index")
+        second_provider = PgVectorProvider(index_name="second-index")
+        first_provider.add([create_embedded_document(key="first:1")])
+        second_provider.add([create_embedded_document(key="second:1")])
+
+        first_provider.clear()
+
+        assert not PgVectorEmbedding.objects.filter(index_name="first-index").exists()
+        assert PgVectorEmbedding.objects.filter(index_name="second-index").exists()
 
     def test_queryset_run_query(self, pg_vector_provider):
         """Test that PgVectorQuerySet.run_query works correctly."""

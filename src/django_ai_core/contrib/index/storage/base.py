@@ -94,6 +94,11 @@ class StorageProvider(ABC):
         """Clear the vector database."""
         ...
 
+    @abstractmethod
+    def prune_to(self, document_keys_to_keep: Iterable[str]):
+        """Remove stored documents whose keys are not in the supplied keep-set."""
+        ...
+
     @property
     def objects(self):
         return self.document_cls().objects

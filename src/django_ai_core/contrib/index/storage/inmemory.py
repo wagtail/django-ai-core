@@ -56,3 +56,9 @@ class InMemoryProvider(StorageProvider):
     def clear(self):
         """Clear the vector database."""
         self.documents.clear()
+
+    def prune_to(self, document_keys_to_keep):
+        """Remove documents that are not part of the rebuilt index."""
+        document_keys_to_keep = set(document_keys_to_keep)
+        for key in set(self.documents) - document_keys_to_keep:
+            del self.documents[key]

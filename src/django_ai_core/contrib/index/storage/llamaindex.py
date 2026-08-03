@@ -100,3 +100,18 @@ class LlamaIndexProvider(StorageProvider):
     def clear(self):
         """Clear the vector database."""
         self.vector_store.clear()
+
+    def prune_to(self, document_keys_to_keep):
+        """Remove documents that are not part of the rebuilt index."""
+        document_keys_to_keep = set(document_keys_to_keep)
+
+        # SimpleVectorStore, the default store, exposes its node IDs through
+        # ``data``. Other LlamaIndex stores may expose them via get_nodes().
+        if hasattr(self.vector_store, "data"):
+            stored_keys = self.vector_store.data.embedding_dict.keys()
+        else:
+            stored_keys = (node.node_id for node in self.vector_store.get_nodes())
+
+        stale_keys = list(set(stored_keys) - document_keys_to_keep)
+        if stale_keys:
+            self.vector_store.delete_nodes(stale_keys)

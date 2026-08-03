@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Generator, Type, cast
+from typing import TYPE_CHECKING, Generator, Iterable, Type, cast
 
 from ...schema import EmbeddedDocument
 from ..base import BaseStorageDocument, BaseStorageQuerySet, StorageProvider
@@ -144,8 +144,16 @@ class PgVectorProvider(StorageProvider):
         Args:
             document_keys: List of document keys to delete.
         """
-        self.model.objects.filter(document_key__in=document_keys).delete()
+        self.model.objects.filter(
+            index_name=self.index_name, document_key__in=document_keys
+        ).delete()
 
     def clear(self) -> None:
-        """Clear all documents from the database."""
-        self.model.objects.all().delete()
+        """Clear documents belonging to this index from the database."""
+        self.model.objects.filter(index_name=self.index_name).delete()
+
+    def prune_to(self, document_keys_to_keep: Iterable[str]) -> None:
+        """Remove documents that are not part of the rebuilt index."""
+        self.model.objects.filter(index_name=self.index_name).exclude(
+            document_key__in=document_keys_to_keep
+        ).delete()

@@ -127,3 +127,26 @@ class QdrantProvider(StorageProvider):
     def clear(self):
         """Clear the vector database."""
         self.client.delete_collection(collection_name=self.index_name)
+
+    def prune_to(self, document_keys_to_keep):
+        """Remove documents that are not part of the rebuilt index."""
+        document_keys_to_keep = list(document_keys_to_keep)
+        if not self.client.collection_exists(self.index_name):
+            return
+        if not document_keys_to_keep:
+            self.clear()
+            return
+
+        self.client.delete(
+            collection_name=self.index_name,
+            points_selector=qdrant_models.FilterSelector(
+                filter=qdrant_models.Filter(
+                    must_not=[
+                        qdrant_models.FieldCondition(
+                            key="document_key",
+                            match=qdrant_models.MatchAny(any=document_keys_to_keep),
+                        )
+                    ]
+                )
+            ),
+        )

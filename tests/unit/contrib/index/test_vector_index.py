@@ -14,6 +14,7 @@ class MockStorageProvider(StorageProvider):
         self.added_documents = []
         self.cleared = False
         self.deleted_keys = []
+        self.pruned_document_keys = []
         self.base_queryset_cls = mock.MagicMock()
 
     def add(self, documents):
@@ -25,6 +26,14 @@ class MockStorageProvider(StorageProvider):
     def clear(self):
         self.cleared = True
         self.added_documents = []
+
+    def prune_to(self, document_keys_to_keep):
+        self.pruned_document_keys = list(document_keys_to_keep)
+        self.added_documents = [
+            document
+            for document in self.added_documents
+            if document.document_key in self.pruned_document_keys
+        ]
 
 
 class MockEmbeddingTransformer(EmbeddingTransformer):
@@ -90,6 +99,7 @@ def test_vector_index_build_empty():
     result = index.build()
 
     assert result == index
+    assert index.storage_provider.pruned_document_keys == []
     assert len(index.storage_provider.added_documents) == 0
 
 
@@ -113,6 +123,36 @@ def test_vector_index_build_with_documents():
     assert len(index.storage_provider.added_documents) == 2
     assert index.storage_provider.added_documents[0].document_key == "mock-source:1"
     assert index.storage_provider.added_documents[1].document_key == "mock-source:2"
+
+
+def test_vector_index_build_removes_stale_documents():
+    source = MockSource(
+        [
+            Document(
+                document_key="mock-source:current",
+                content="Current document",
+                metadata={"id": 1},
+            )
+        ]
+    )
+    index = create_test_vector_index_cls(sources=[source])()
+
+    # Simulate a document that was present during a previous build but is no
+    # longer returned by the source (for example, it was unpublished).
+    index.storage_provider.added_documents.append(
+        Document(
+            document_key="mock-source:stale",
+            content="Stale document",
+            metadata={"id": 2},
+        )
+    )
+
+    index.build()
+
+    assert not index.storage_provider.cleared
+    assert [
+        document.document_key for document in index.storage_provider.added_documents
+    ] == ["mock-source:current"]
 
 
 def test_vector_index_update():
