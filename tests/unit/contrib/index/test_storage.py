@@ -65,6 +65,19 @@ class TestInMemoryProvider:
         provider.clear()
         assert len(provider.documents) == 0
 
+    def test_prune_documents_not_in_rebuild(self):
+        provider = InMemoryProvider()
+        provider.add(
+            [
+                create_embedded_document(key="test:current"),
+                create_embedded_document(key="test:stale"),
+            ]
+        )
+
+        provider.prune_to(["test:current"])
+
+        assert list(provider.documents) == ["test:current"]
+
     def test_document_class_generation(self):
         """Test document_cls property generates correct class."""
         provider = InMemoryProvider()

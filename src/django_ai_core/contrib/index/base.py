@@ -49,6 +49,7 @@ class VectorIndex:
         1. Get documents from all sources
         2. Process them through the embedding pipeline
         3. Store the embedded documents in the vector storage
+        4. Remove stored documents that are no longer supplied by a source
 
         Returns:
             Self for method chaining
@@ -58,11 +59,10 @@ class VectorIndex:
             logger.info(f"Getting documents from source {source.source_id}")
             documents.extend(source.get_documents())
 
-        if not documents:
-            logger.warning("No documents provided by sources")
-            return self
-
         self.update(documents)
+
+        logger.info("Removing stale documents from vector storage")
+        self.storage_provider.prune_to(document.document_key for document in documents)
 
         return self
 

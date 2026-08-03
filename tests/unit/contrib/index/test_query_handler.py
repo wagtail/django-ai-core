@@ -126,6 +126,9 @@ class MockStorageProvider(StorageProvider):
     def clear(self):
         pass
 
+    def prune_to(self, document_keys_to_keep):
+        pass
+
 
 class TestDocumentResultMixin:
     def test_returns_raw_documents(self):
