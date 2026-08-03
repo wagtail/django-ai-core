@@ -237,9 +237,10 @@ class ModelSource(ObjectSource):
     def post_index_update(self, index):
         from .models import ModelSourceIndex
 
+        index_name = type(index).__name__
         ModelSourceIndex.objects.filter(
-            index_name=index, source_id=self.source_id
+            index_name=index_name, source_id=self.source_id
         ).delete()
 
         for obj in self.queryset:
-            ModelSourceIndex.register(obj, index, self.source_id)
+            ModelSourceIndex.register(obj, index_name, self.source_id)

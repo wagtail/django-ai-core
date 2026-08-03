@@ -3,6 +3,7 @@ import random
 import pytest
 from testapp.models import Book
 
+from django_ai_core.contrib.index.models import ModelSourceIndex
 from django_ai_core.contrib.index.source import ModelSource
 
 
@@ -64,3 +65,20 @@ def test_model_source_returns_unique_keys():
     documents = model_source.get_documents()
     document_keys = [doc.document_key for doc in documents]
     assert len(document_keys) == len(set(document_keys))
+
+
+@pytest.mark.django_db
+def test_model_source_registers_index_by_class_name():
+    class VerboseIndex:
+        def __repr__(self):
+            return "verbose index representation" * 100
+
+    Book.objects.create(title="Book Title", description="Description")
+
+    source = ModelSource(model=Book)
+    source.post_index_update(VerboseIndex())
+    source.post_index_update(VerboseIndex())
+
+    registration = ModelSourceIndex.objects.get()
+    assert ModelSourceIndex.objects.count() == 1
+    assert registration.index_name == "VerboseIndex"
