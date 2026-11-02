@@ -1,3 +1,6 @@
+__lazy_modules__ = ["any_llm"]
+
+
 import logging
 from typing import TYPE_CHECKING
 
