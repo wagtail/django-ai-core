@@ -4,6 +4,7 @@ import uuid
 import pytest
 from testapp.models import Book
 
+from django_ai_core.contrib.index.chunking import ParagraphChunkTransformer
 from django_ai_core.contrib.index.models import ModelSourceIndex
 from django_ai_core.contrib.index.source import ModelSource
 
@@ -86,3 +87,14 @@ def test_model_source_registers_index_by_class_name():
     registration = ModelSourceIndex.objects.get()
     assert ModelSourceIndex.objects.count() == 1
     assert registration.index_name == "VerboseIndex"
+
+
+@pytest.mark.django_db
+def test_model_source_uses_custom_chunk_transformer():
+    Book.objects.create(title="Book Title", description=generate_long_string())
+
+    chunk_transformer = ParagraphChunkTransformer()
+    source = ModelSource(model=Book, chunk_transformer=chunk_transformer)
+
+    assert source.chunk_transformer is chunk_transformer
+    assert len(list(source.get_documents())) > 0

@@ -82,6 +82,8 @@ class ModelSource(ObjectSource):
 
         if chunk_transformer is None:
             self.chunk_transformer = SimpleChunkTransformer()
+        else:
+            self.chunk_transformer = chunk_transformer
 
         self.content_fields = content_fields
         self.metadata_fields = metadata_fields
