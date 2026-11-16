@@ -1,3 +1,5 @@
+import subprocess
+import sys
 from unittest import mock
 
 import pytest
@@ -51,3 +53,14 @@ def test_llm_service_embedding_wraps_anyllm(mock_any_llm):
     service = LLMService(client=mock_any_llm, model="mock-model")
     service.embedding(prompt)
     mock_any_llm._embedding.assert_called_once_with(model="mock-model", inputs=prompt)
+
+
+def test_importing_llm_does_not_import_any_llm():
+    # any-llm imports every provider SDK it knows about, so it should only be
+    # loaded when an LLMService is actually created.
+    code = (
+        "import sys\n"
+        "import django_ai_core.llm\n"
+        "assert 'any_llm' not in sys.modules, 'any_llm was imported'\n"
+    )
+    subprocess.run([sys.executable, "-c", code], check=True)
