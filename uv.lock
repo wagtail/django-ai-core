@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.11"
 resolution-markers = [
     "python_full_version >= '3.13'",
@@ -366,8 +366,9 @@ wheels = [
 
 [[package]]
 name = "django-ai-core"
-version = "0.1.6"
+version = "0.1.7"
 source = { editable = "." }
+default-groups = ["dev", "test"]
 dependencies = [
     { name = "any-llm-sdk" },
     { name = "queryish" },

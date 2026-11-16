@@ -1,6 +1,6 @@
 [project]
 name = "django-ai-core"
-version = "0.1.6"
+version = "0.1.7"
 description = "Django AI Core provides developer-focused AI features for implementing AI tooling in to Django sites."
 readme = "README.md"
 license = "BSD-3-Clause"
